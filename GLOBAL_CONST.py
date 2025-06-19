@@ -1,0 +1,5 @@
+APP_KEY = "516020"
+APP_SECRET = "jYs7GpzsxdH6x0UXP6yYy45bjTNG5xhY"
+AUTH_CODE = "3_516020_jG11lZfmRyzZtOSK6emJ6rH118674"
+REDIRECT_URI = "https://www.idealf.shop"
+URL = "https://api-sg.aliexpress.com/sync"

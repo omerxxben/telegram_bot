@@ -1,29 +1,20 @@
-import json
 import requests
 import hashlib
-import time
-
 from GLOBAL_CONST import *
 
 
-class AliExpressApi:
-    def process(self, product_name, number_of_rows):
-        timestamp = int(time.time() * 1000)
+class AliExpressApiProducts:
+    def process(self, products):
         params = {
-            "keywords": product_name,
             "app_key": APP_KEY,
-            "timestamp": timestamp,
-            "method": "aliexpress.affiliate.product.query",
+            "method": "aliexpress.affiliate.product.sku.detail.get",
             "sign_method": "md5",
             "format": "json",
             "v": "2.0",
-            "page_no": "1",
-            "page_size": number_of_rows,
+            "ship_to_country": "1",
+            "product_id": products.product_id,
             "target_currency": "ILS",
             "target_language": "he",
-            "sort": "SALE_PRICE_ASC",
-            "platform_product_type": "ALL",
-            "ship_to_country": "IL",
         }
         params["sign"] = self.generate_signature(params)
         try:
