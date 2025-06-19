@@ -1,20 +1,22 @@
 import requests
 import hashlib
 from GLOBAL_CONST import *
-
+import time
 
 class AliExpressApiProducts:
     def process(self, products):
+        timestamp = int(time.time() * 1000)
         params = {
             "app_key": APP_KEY,
             "method": "aliexpress.affiliate.product.sku.detail.get",
             "sign_method": "md5",
             "format": "json",
             "v": "2.0",
-            "ship_to_country": "1",
-            "product_id": products.product_id,
+            "timestamp": timestamp,
+            "ship_to_country": "IL",
+            "product_id": 1005007859139314,
             "target_currency": "ILS",
-            "target_language": "he",
+            "target_language": "HE",
         }
         params["sign"] = self.generate_signature(params)
         try:
