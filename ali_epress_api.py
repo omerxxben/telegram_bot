@@ -10,7 +10,7 @@ class AliExpressApi:
         self.APP_SECRET = "b5EEHi2TlMY4hIqU2LkuT0lc3NztGsN5"
         self.TRACKING_ID = "your_tracking_id"
 
-    def process(self, product_name):
+    def process(self, product_name, number_of_rows):
         timestamp = int(time.time() * 1000)
         params = {
             "keywords": product_name,
@@ -20,9 +20,8 @@ class AliExpressApi:
             "sign_method": "md5",
             "format": "json",
             "v": "2.0",
-            "fields": "commission_rate,sale_price,product_title,product_main_image_url",
             "page_no": "1",
-            "page_size": "1",
+            "page_size": number_of_rows,
             "target_currency": "ILS",
             "target_language": "he",
             "sort": "SALE_PRICE_ASC",
