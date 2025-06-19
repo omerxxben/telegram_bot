@@ -11,10 +11,14 @@ class ProductsTransform:
             'product_title',
             'commission_rate'
         ]
-    def transform_to_table(self, api_result: Dict[str, Any]) -> pd.DataFrame:
+
+    def transform_to_table(self, products: Dict[str, Any]) -> pd.DataFrame:
+        """
+        Transform AliExpress API result to a pandas DataFrame with specified columns.
+        """
         try:
             # Navigate through the nested structure
-            products_data = api_result.get(
+            products_data = products.get(
                 'aliexpress_affiliate_product_query_response', {}
             ).get('resp_result', {}).get('result', {}).get('products', {}).get('product', [])
 
@@ -36,6 +40,36 @@ class ProductsTransform:
             return pd.DataFrame(columns=self.columns)
 
     def transform_to_dict_list(self, api_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Transform AliExpress API result to a list of dictionaries with specified columns.
+        """
+        try:
+            # Navigate through the nested structure
+            products_data = api_result.get(
+                'aliexpress_affiliate_product_query_response', {}
+            ).get('resp_result', {}).get('result', {}).get('products', {}).get('product', [])
+
+            if not products_data:
+                return []
+
+            # Extract specified columns from each product
+            transformed_data = []
+            for product in products_data:
+                row = {}
+                for column in self.columns:
+                    row[column] = product.get(column, '')
+                transformed_data.append(row)
+
+            return transformed_data
+
+        except Exception as e:
+            print(f"Error transforming data: {e}")
+            return []
+
+    def print_table(self, api_result: Dict[str, Any]) -> None:
+        """
+        Print the transformed data as a formatted table.
+        """
         df = self.transform_to_table(api_result)
 
         if df.empty:
@@ -46,9 +80,13 @@ class ProductsTransform:
         pd.set_option('display.max_columns', None)
         pd.set_option('display.width', None)
         pd.set_option('display.max_colwidth', 50)
+
         print(df.to_string(index=False))
 
     def save_to_csv(self, api_result: Dict[str, Any], filename: str = 'aliexpress_products.csv') -> None:
+        """
+        Save the transformed data to a CSV file.
+        """
         df = self.transform_to_table(api_result)
         if df.empty:
             print("No data to save")
@@ -57,6 +95,9 @@ class ProductsTransform:
         print(f"Data saved to {filename}")
 
     def get_summary_stats(self, api_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Get summary statistics about the transformed data.
+        """
         try:
             # Get basic info from the API response
             resp_result = api_result.get('aliexpress_affiliate_product_query_response', {}).get('resp_result', {})
