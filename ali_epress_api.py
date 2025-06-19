@@ -10,10 +10,10 @@ class AliExpressApi:
         self.APP_SECRET = "b5EEHi2TlMY4hIqU2LkuT0lc3NztGsN5"
         self.TRACKING_ID = "your_tracking_id"
 
-    def process(self):
+    def process(self, product_name):
         timestamp = int(time.time() * 1000)
         params = {
-            "keywords": "coat",
+            "keywords": product_name,
             "app_key": self.APP_KEY,
             "timestamp": timestamp,
             "method": "aliexpress.affiliate.product.query",
