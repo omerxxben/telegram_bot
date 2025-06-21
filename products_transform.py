@@ -71,7 +71,7 @@ class ProductsTransform:
         """
         try:
             df = self.transform_to_table(api_result)
-
+            #return df
             if df.empty:
                 return df
 
