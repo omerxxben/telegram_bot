@@ -6,8 +6,8 @@ class ProductsTransform:
     def __init__(self):
         self.columns = [
             'product_id',
-            'app_sale_price',
-            'commission_rate'
+            'target_sale_price',
+            'commission_rate',
             'product_title',
             'product_main_image_url',
             'promotion_link',
@@ -59,6 +59,33 @@ class ProductsTransform:
             print(f"Error transforming data: {e}")
             return []
 
+    def filter_by_commission_rate(self, api_result: Dict[str, Any]) -> pd.DataFrame:
+        """
+        Filter products to remove rows where commission_rate is empty, None, or zero.
+        Returns a DataFrame with only products that have a valid commission rate.
+        """
+        try:
+            df = self.transform_to_table(api_result)
+
+            if df.empty:
+                return df
+
+            # Filter out rows where commission_rate is empty, None, NaN, or zero
+            # This handles various "no value" scenarios
+            filtered_df = df[
+                (df['commission_rate'] != '') &
+                (df['commission_rate'].notna()) &
+                (df['commission_rate'] != '0') &
+                (df['commission_rate'] != 0)
+                ]
+
+            print(f"Original rows: {len(df)}, Filtered rows: {len(filtered_df)}")
+            return filtered_df
+
+        except Exception as e:
+            print(f"Error filtering data: {e}")
+            return pd.DataFrame(columns=self.columns)
+
     def print_table(self, api_result: Dict[str, Any]) -> None:
         df = self.transform_to_table(api_result)
 
@@ -80,6 +107,18 @@ class ProductsTransform:
             return
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"Data saved to {filename}")
+
+    def save_filtered_to_csv(self, api_result: Dict[str, Any],
+                             filename: str = 'aliexpress_products_filtered.csv') -> None:
+        """
+        Save filtered products (with valid commission rates) to CSV.
+        """
+        df = self.filter_by_commission_rate(api_result)
+        if df.empty:
+            print("No filtered data to save")
+            return
+        df.to_csv(filename, index=False, encoding='utf-8')
+        print(f"Filtered data saved to {filename}")
 
     def get_summary_stats(self, api_result: Dict[str, Any]) -> Dict[str, Any]:
         try:
