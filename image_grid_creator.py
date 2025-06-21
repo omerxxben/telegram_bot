@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -198,32 +199,9 @@ class ImageGridCreator:
 
         return grid_image
 
-    def save_grid(self, image_urls: List[str], output_path: str = "image_grid.jpg"):
-        """
-        Create and save the image grid
-
-        Args:
-            image_urls: List of 4 image URLs
-            output_path: Path to save the final image
-        """
+    def save_grid(self, df: pd.DataFrame, output_path: str = "image_grid.jpg", image_column: str = "product_main_image_url"):
+        image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)
         grid_image.save(output_path, quality=95)
         print(f"Grid image saved as {output_path}")
-
         return grid_image
-
-
-if __name__ == "__main__":
-    # Example image URLs (replace with your own)
-    creator = ImageGridCreator(grid_size=(800, 800))
-    urls = [
-        "https://ae-pic-a1.aliexpress-media.com/kf/Sb1dc4ea309384a7a807cd0a6b8b2f8845.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/HTB1mEK0fBUSMeJjy1zjq6A0dXXak.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/S808417db5f8249488b13a521d251644bA.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/S3f3aceb465a84688889de26fed16989fT.jpeg"
-    ]
-
-    result_image = creator.save_grid(urls, r"C:\Users\User\Desktop\images\grid.jpg")
-
-    # Optionally display the image (if running in an environment that supports it)
-    # result_image.show()

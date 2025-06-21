@@ -14,15 +14,8 @@ if __name__ == "__main__":
     products_df_detailed = AliExpressApiProducts().process(products_df)
     products_df_rank = getRank().calculate(products_df_detailed)
     #products_df_relevant = CheckRelevant().check(products_df_rank)
-    creator = ImageGridCreator(grid_size=(800, 600))
-    urls = [
-        "https://ae-pic-a1.aliexpress-media.com/kf/Sb1dc4ea309384a7a807cd0a6b8b2f8845.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/HTB1mEK0fBUSMeJjy1zjq6A0dXXak.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/S808417db5f8249488b13a521d251644bA.jpg",
-        "https://ae-pic-a1.aliexpress-media.com/kf/S3f3aceb465a84688889de26fed16989fT.jpeg"
-    ]
-
-    result_image = creator.save_grid(urls, f"""C:\\Users\\User\\Desktop\\images""")
+    creator = ImageGridCreator(grid_size=(800, 800))
+    result_image = creator.save_grid(products_df_rank, r"C:\Users\User\Desktop\images\grid.jpg")
     pretty_print_df(products_df_rank)
 
 
