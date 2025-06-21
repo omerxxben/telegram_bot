@@ -5,6 +5,8 @@ from typing import Dict, List, Any, Optional
 class ProductsTransform:
     def __init__(self):
         self.columns = [
+            'rank',
+            'grade',
             'product_id',
             'target_sale_price',
             'commission_rate',
