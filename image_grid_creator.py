@@ -13,11 +13,11 @@ class ImageGridCreator:
             grid_size: Tuple of (width, height) for the final grid image
         """
         self.grid_size = grid_size
-        self.medal_colors = {
-            1: '#FFD700',  # Gold
-            2: '#C0C0C0',  # Silver
-            3: '#CD7F32',  # Bronze
-            4: '#4A4A4A'  # Gray for 4th place
+        self.medal_emojis = {
+            1: '🥇',  # Gold medal
+            2: '🥈',  # Silver medal
+            3: '🥉',  # Bronze medal
+            4: '🏅'  # Sports medal for 4th place
         }
 
     def download_image(self, url: str) -> Image.Image:
@@ -43,39 +43,81 @@ class ImageGridCreator:
             draw.text((200, 150), "Image Not Found", fill='black', anchor='mm')
             return placeholder
 
-    def create_medal(self, place: int, size: int = 60) -> Image.Image:
+    def create_medal(self, place: int, size: int = 80) -> Image.Image:
         """
-        Create a medal image for the given place
+        Create a medal emoji image for the given place (or number for 4th place)
 
         Args:
             place: Place number (1-4)
             size: Size of the medal in pixels
 
         Returns:
-            PIL Image object of the medal
+            PIL Image object of the medal emoji or number
         """
         medal = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         draw = ImageDraw.Draw(medal)
 
-        # Draw medal circle
-        color = self.medal_colors.get(place, '#4A4A4A')
-        draw.ellipse([5, 5, size - 5, size - 5], fill=color, outline='black', width=2)
+        if place == 4:
+            # For 4th place, draw a smaller circle with the number 4
+            circle_margin = 15  # More margin to make circle smaller
+            draw.ellipse([circle_margin, circle_margin, size - circle_margin, size - circle_margin], fill='#4A4A4A',
+                         outline='black', width=2)
 
-        # Add place number
-        try:
-            # Try to use default font, fall back to basic if not available
-            font = ImageFont.truetype("arial.ttf", size // 3)
-        except:
-            font = ImageFont.load_default()
+            # Add the number 4 with Rubik font (smaller size)
+            try:
+                font = ImageFont.truetype("Rubik-Regular.ttf", size // 3)  # Smaller font
+            except:
+                try:
+                    font = ImageFont.truetype("Rubik.ttf", size // 3)
+                except:
+                    try:
+                        # Try system font paths
+                        font = ImageFont.truetype("C:/Windows/Fonts/Rubik-Regular.ttf", size // 3)
+                    except:
+                        # Fall back to arial if Rubik not found
+                        try:
+                            font = ImageFont.truetype("arial.ttf", size // 3)
+                        except:
+                            font = ImageFont.load_default()
 
-        # Draw the place number
-        text = str(place)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        x = (size - text_width) // 2
-        y = (size - text_height) // 2
-        draw.text((x, y), text, fill='white', font=font, stroke_width=1, stroke_fill='black')
+            text = "4"
+            # Get exact text bounding box for perfect centering
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+
+            # Calculate center position more precisely
+            x = (size - text_width) // 2 - bbox[0]  # Adjust for bbox offset
+            y = (size - text_height) // 2 - bbox[1]  # Adjust for bbox offset
+
+            draw.text((x, y), text, fill='white', font=font, stroke_width=2, stroke_fill='black')
+        else:
+            # For 1st, 2nd, 3rd place, use emojis
+            emoji = self.medal_emojis.get(place, '🏅')
+
+            # Try to use a larger font size for better emoji visibility
+            font_size = int(size * 0.8)  # Use 80% of the medal size
+            try:
+                # Try to load a font that supports emojis
+                font = ImageFont.truetype("seguiemj.ttf", font_size)  # Windows emoji font
+            except:
+                try:
+                    font = ImageFont.truetype("NotoColorEmoji.ttf", font_size)  # Linux emoji font
+                except:
+                    try:
+                        font = ImageFont.truetype("Apple Color Emoji.ttc", font_size)  # macOS emoji font
+                    except:
+                        # Fall back to default font with smaller size
+                        font = ImageFont.load_default()
+                        font_size = size // 2
+
+            # Draw the emoji
+            bbox = draw.textbbox((0, 0), emoji, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = (size - text_width) // 2
+            y = (size - text_height) // 2
+            draw.text((x, y), emoji, font=font, embedded_color=True)
 
         return medal
 
@@ -141,11 +183,13 @@ class ImageGridCreator:
             # Paste the image
             grid_image.paste(img, pos)
 
-            # Create and paste medal
-            medal = self.create_medal(i + 1)
+            # Create and paste medal (made bigger)
+            medal = self.create_medal(i + 1, size=80)
             medal_x = pos[0] + individual_width - medal.width - 10
             medal_y = pos[1] + 10
-
+            if i == 3:  # 4th place (index 3)
+                medal_x = pos[0] + individual_width - medal.width - 3  # Change this number
+                medal_y = pos[1] - 5  # Change this number
             # Paste medal with transparency
             if medal.mode == 'RGBA':
                 grid_image.paste(medal, (medal_x, medal_y), medal)
@@ -168,7 +212,7 @@ class ImageGridCreator:
 
         return grid_image
 
-# Example usage
+
 if __name__ == "__main__":
     # Example image URLs (replace with your own)
     creator = ImageGridCreator(grid_size=(800, 800))
