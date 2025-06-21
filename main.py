@@ -7,10 +7,11 @@ from products_transform import ProductsTransform
 
 if __name__ == "__main__":
     product_name = ("BOLBOL")
-    products = AliExpressApi().process(product_name, 1)
+    products = AliExpressApi().process(product_name, 5)
     #print(json.dumps(products, indent=4, ensure_ascii=False))
-    products = AliExpressApiProducts().process(products)
-    print(json.dumps(products, indent=4, ensure_ascii=False))
+    products_df = ProductsTransform().transform_to_table(products)
+    products_df = AliExpressApiProducts().process(products_df)
+    pretty_print_df(products_df)
 
-    table = ProductsTransform().transform_to_table(products)
-    pretty_print_df(table)
+    #print(json.dumps(products, indent=4, ensure_ascii=False))
+
