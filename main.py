@@ -8,7 +8,7 @@ from products_transform import ProductsTransform
 if __name__ == "__main__":
     #print(json.dumps(products, indent=4, ensure_ascii=False))
     product_name = ("BOLBOL")
-    products = AliExpressApi().process(product_name, 5)
+    products = AliExpressApi().process(product_name, 20)
     products_df = ProductsTransform().transform_to_table(products)
     products_df_detailed = AliExpressApiProducts().process(products_df)
     pretty_print_df(products_df_detailed)

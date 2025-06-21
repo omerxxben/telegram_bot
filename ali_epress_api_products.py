@@ -30,6 +30,9 @@ class AliExpressApiProducts:
 
         # Create a list of (index, product_id) tuples for threading
         tasks = [(index, str(row['product_id'])) for index, row in products_df.iterrows()]
+
+        print(f"Processing {len(tasks)} products with {self.max_workers} threads...")
+
         # Use ThreadPoolExecutor for concurrent API calls
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all tasks
@@ -88,8 +91,8 @@ class AliExpressApiProducts:
 
                 return (
                     float(avg_rating) if avg_rating else None,
-                    int(sales_count) if sales_count else None,
-                    int(eval_count) if eval_count else None
+                    self._parse_count(sales_count),
+                    self._parse_count(eval_count)
                 )
             except (KeyError, ValueError, TypeError) as e:
                 print(f"  ✗ Error extracting data for product {product_id}: {e}")
@@ -124,6 +127,30 @@ class AliExpressApiProducts:
             return {"error": f"Request failed: {str(e)}"}
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
+
+    def _parse_count(self, count_str) -> str or None:
+        """
+        Parse count strings preserving original formatting including '+' suffix and commas
+
+        Args:
+            count_str: String or number to parse
+
+        Returns:
+            String value preserving original format, or None if parsing fails
+        """
+        if count_str is None:
+            return None
+
+        try:
+            # If it's already an integer, convert to string
+            if isinstance(count_str, int):
+                return str(count_str)
+
+            # Convert to string and strip whitespace, but keep everything else as-is
+            return str(count_str).strip()
+
+        except (ValueError, TypeError):
+            return None
 
     def generate_signature(self, params: dict) -> str:
         sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))
