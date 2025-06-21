@@ -1,3 +1,5 @@
+import json
+
 import requests
 import hashlib
 from GLOBAL_CONST import *
@@ -48,6 +50,7 @@ class AliExpressApiProducts:
                 try:
                     result = future.result()
                     if result:
+
                         avg_rating, sales_count, eval_count = result
                         products_df.at[index, 'avg_evaluation_rating'] = avg_rating
                         products_df.at[index, 'sales_count'] = sales_count
@@ -122,6 +125,7 @@ class AliExpressApiProducts:
         try:
             response = requests.get(URL, params=params, timeout=30)
             response.raise_for_status()
+
             return response.json()
         except requests.exceptions.RequestException as e:
             return {"error": f"Request failed: {str(e)}"}
