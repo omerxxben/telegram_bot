@@ -5,13 +5,12 @@ from typing import Dict, List, Any, Optional
 class ProductsTransform:
     def __init__(self):
         self.columns = [
-            'evaluate_rate',
             'product_id',
             'app_sale_price',
+            'commission_rate'
+            'product_title',
             'product_main_image_url',
             'promotion_link',
-            'product_title',
-            'commission_rate'
         ]
 
     def transform_to_table(self, products: Dict[str, Any]) -> pd.DataFrame:
