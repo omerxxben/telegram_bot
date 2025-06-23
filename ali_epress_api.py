@@ -23,6 +23,7 @@ class AliExpressApi:
             "target_language": "EN",
             "platform_product_type": "ALL",
             "ship_to_country": "IL",
+            "category_id": "2",
         }
         params["sign"] = self.generate_signature(params)
         try:
