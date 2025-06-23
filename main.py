@@ -2,6 +2,7 @@ import json
 
 from ale_express_api_categories import AliExpressApiCategories
 from ali_epress_api_products import AliExpressApiProducts
+from category_finder import CategoryFinder
 from general_tools import pretty_print_df
 from ali_epress_api import AliExpressApi
 from get_rank import getRank
@@ -12,13 +13,13 @@ if __name__ == "__main__":
     OUTPUT_PATH = r"C:\Users\User\OneDrive\שולחן העבודה\images\grid.jpg"
     #OUTPUT_PATH = r"C:\Users\User\Desktop\images\grid.jpg"
     #print(json.dumps(products, indent=4, ensure_ascii=False))
-    product_name_hebrew = "גבל פליפ 6"
+    #product_name_hebrew = "רמקול"
     #product_name_english = Translate.process(product_name_hebrew)
-    product_name_english = "jbl flip 6 speaker"
+    product_name_english = "jbl flip 6"
     category_json = AliExpressApiCategories().process()
-    print(category_json)
-
-    products = AliExpressApi().process(product_name_english, 10)
+    #print(category_json)
+    #category = CategoryFinder.process(category_json, product_name_english)
+    products = AliExpressApi().process(product_name_english, 100)
     products_df = ProductsTransform().transform_to_table(products)
     products_df_detailed = AliExpressApiProducts().process(products_df)
     products_df_rank = getRank().calculate(products_df_detailed)

@@ -17,13 +17,14 @@ class AliExpressApi:
             "sign_method": "md5",
             "format": "json",
             "v": "2.0",
-            "page_no": "1",
+            "page_no": 1,
             "page_size": number_of_rows,
             "target_currency": "ILS",
-            "target_language": "EN",
+            "target_language": "HE",
             "platform_product_type": "ALL",
             "ship_to_country": "IL",
-            "category_id": "2",
+            "sort": "LAST_VOLUME_DESC",
+           # "max_sale_price": 1
         }
         params["sign"] = self.generate_signature(params)
         try:
