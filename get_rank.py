@@ -94,3 +94,8 @@ class getRank:
             df['grade'] = pd.NA
             df['rank'] = pd.NA
             return df
+    def sort_by_volume(self, df):
+        df = df.sort_values(by='lastest_volume', ascending=False)
+        return df
+
+

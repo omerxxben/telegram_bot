@@ -7,6 +7,8 @@ class ProductsTransform:
         self.columns = [
             'rank',
             'grade',
+            'lastest_volume',
+            'second_level_category_name',
             'product_id',
             'target_sale_price',
             'commission_rate',
