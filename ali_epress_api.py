@@ -7,7 +7,7 @@ from GLOBAL_CONST import *
 
 
 class AliExpressApi:
-    def process(self, product_name, number_of_rows):
+    def  process(self, product_name, number_of_rows):
         timestamp = int(time.time() * 1000)
         params = {
             "keywords": product_name,
@@ -16,15 +16,13 @@ class AliExpressApi:
             "method": "aliexpress.affiliate.product.query",
             "sign_method": "md5",
             "format": "json",
-            "v": "2.0",
             "page_no": 1,
             "page_size": number_of_rows,
+            "category_ids": "111",
             "target_currency": "ILS",
             "target_language": "HE",
             "platform_product_type": "ALL",
             "ship_to_country": "IL",
-            "sort": "LAST_VOLUME_DESC",
-           # "max_sale_price": 1
         }
         params["sign"] = self.generate_signature(params)
         try:
