@@ -11,6 +11,8 @@ class CategoryFilter:
             category_set.add(category_str)
         the_best_category = self.ai_picker(category_set, product_name_english)
         print("the best category found by ai is: " + the_best_category)
+        print("other categories: " + str(category_set))
+
         filtered_df = self.remove_matching_category(products_df, the_best_category)
         print(f"numer of rows remaining after category filtered: {len(filtered_df)}")
         return filtered_df
