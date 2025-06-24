@@ -13,7 +13,7 @@ if __name__ == "__main__":
     #print(json.dumps(products, indent=4, ensure_ascii=False))
     #product_name_hebrew = "רמקול"
     #product_name_english = Translate.process(product_name_hebrew)
-    product_name_english = "dualshock 4"
+    product_name_english = "jbl flip 6"
     products = AliExpressApi().process(product_name_english, 50)
     products_df = ProductsTransform().transform_to_table(products)
     products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
