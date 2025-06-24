@@ -1,3 +1,4 @@
+from numpy.ma.core import maximum
 from openai import OpenAI
 import json
 
@@ -8,7 +9,7 @@ class CheckTitle:
     def check(self, product_name, products_df):
         title_list = list(products_df['product_title'])
         final_numbers = []
-        batch_size = 5
+        batch_size = 10
         offset = 0
         while offset < len(title_list) and len(final_numbers) < 4:
             batch = title_list[offset:offset + batch_size]
@@ -19,6 +20,8 @@ class CheckTitle:
         top_indices = final_numbers[:4]
         filtered_df = products_df.iloc[top_indices].reset_index(drop=True)
         return filtered_df
+
+
 
 class ProductMatcher:
     def __init__(self):
@@ -39,19 +42,48 @@ class ProductMatcher:
                         "content": f"Search query: \"{search_query}\"\n\nProduct titles to analyze:\n{titles_text}\n\nReturn JSON with 0 for relevant titles, 1 for irrelevant titles:"
                     }
                 ],
-                max_tokens=1000,
+                max_tokens=800,
                 temperature=0.1
             )
 
             result = response.choices[0].message.content.strip()
-            return json.loads(result)
+            print(f"Raw API response: '{result}'")  # Debug: see what we actually got
+
+            if not result:
+                print("Error: Empty response from API")
+                return {}
+
+            # Remove markdown code block formatting if present
+            if result.startswith("```json"):
+                result = result[7:]  # Remove ```json
+            if result.startswith("```"):
+                result = result[3:]  # Remove ```
+            if result.endswith("```"):
+                result = result[:-3]  # Remove trailing ```
+            result = result.strip()
+
+            try:
+                return json.loads(result)
+            except json.JSONDecodeError as json_error:
+                print(f"JSON parsing error: {json_error}")
+                print(f"Failed to parse: '{result}'")
+                return {}
 
         except Exception as e:
             print(f"Error checking titles: {str(e)}")
             return {}
 
     def find_suitable_titles(self, search_query: str, product_titles: list) -> list:
+        """
+        Find 3 suitable product titles for the given search query.
 
+        Args:
+            search_query (str): The search query
+            product_titles (list): List of all product titles from AliExpress
+
+        Returns:
+            list: Indexes of suitable titles (up to 3)
+        """
         if not product_titles:
             print("No product titles provided")
             return []
@@ -63,9 +95,7 @@ class ProductMatcher:
             print("Failed to get results from AI model")
             return []
 
-        # Convert string keys to integers for cleaner output
-        int_results = {int(k): v for k, v in results.items()}
-        print(f"AI returned: {int_results}")  # Debug output
+        print(f"AI returned: {results}")  # Debug output
 
         # Extract suitable indexes (where value is 0)
         suitable_indexes = []
