@@ -1,6 +1,7 @@
 import json
 from ali_epress_api_products import AliExpressApiProducts
 from category_filter import CategoryFilter
+from check_title import CheckTitle
 from general_tools import pretty_print_df
 from ali_epress_api import AliExpressApi
 from get_rank import getRank
@@ -13,12 +14,14 @@ if __name__ == "__main__":
     #print(json.dumps(products, indent=4, ensure_ascii=False))
     #product_name_hebrew = "רמקול"
     #product_name_english = Translate.process(product_name_hebrew)
-    product_name_english = "jbl flip 6"
+    product_name_english = "bluetooth adapter for pc"
     products = AliExpressApi().process(product_name_english, 50)
     products_df = ProductsTransform().transform_to_table(products)
-    products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
-    products_df_rank = getRank().sort_by_volume(products_df_relevant_category)
-    pretty_print_df(products_df_rank)
+    #products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
+    products_df_rank = getRank().sort_by_volume(products_df)
+    products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
+
+    pretty_print_df(products_df_filtered_by_title)
 
     #products_df_detailed = AliExpressApiProducts().process(products_df)
 
