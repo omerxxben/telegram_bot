@@ -10,7 +10,7 @@ class CategoryFilter:
             category_str = f"{row['first_level_category_name']}:{row['second_level_category_name']}"
             category_set.add(category_str)
         the_best_category = self.ai_picker(category_set, product_name_english)
-        print(the_best_category)
+        print("the best category found by ai is: " + the_best_category)
         filtered_df = self.remove_matching_category(products_df, the_best_category)
         print(filtered_df)
         return filtered_df
