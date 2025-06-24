@@ -21,7 +21,7 @@ class ProductsTransform:
     def transform_to_table(self, products: Dict[str, Any]) -> pd.DataFrame:
         try:
             products_data = products.get(
-                'aliexpress_affiliate_product_query_response', {}
+                'aliexpress_affiliate_hotproduct_query_response', {}
             ).get('resp_result', {}).get('result', {}).get('products', {}).get('product', [])
 
             if not products_data:
