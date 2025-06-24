@@ -19,7 +19,7 @@ class AliExpressApi:
             "page_no": 1,
             "page_size": number_of_rows,
             "target_currency": "ILS",
-            "target_language": "HE",
+            "target_language": "ENG",
             "platform_product_type": "ALL",
             "ship_to_country": "IL",
             "sort": "LAST_VOLUME_DESC"

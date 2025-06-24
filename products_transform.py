@@ -8,6 +8,7 @@ class ProductsTransform:
             'rank',
             'grade',
             'lastest_volume',
+            'first_level_category_name',
             'second_level_category_name',
             'product_id',
             'target_sale_price',
