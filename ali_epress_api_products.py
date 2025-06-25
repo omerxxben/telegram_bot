@@ -18,6 +18,8 @@ class AliExpressApiProducts:
         self._last_request_time = 0
 
     def process(self, products_df: pd.DataFrame) -> pd.DataFrame:
+        if products_df.empty:
+            return pd.DataFrame()
         products_df = products_df.copy()
         products_df['avg_evaluation_rating'] = None
         products_df['sales_count'] = None

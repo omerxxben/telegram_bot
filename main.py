@@ -16,14 +16,13 @@ if __name__ == "__main__":
     product_name_english = AIManager().translate_hebrew_query(search_query)
     products = AliExpressApi().process(product_name_english,  60)
     #products_df = ProductsTransform().transform_to_table(products)
-    #products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
     products_df_rank = getRank().sort_by_volume(products)
     #pretty_print_df(products_df_rank)
     products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
     pretty_print_df(products_df_filtered_by_title)
     products_df_detailed = AliExpressApiProducts().process(products)
     #products_df_rank = getRank().calculate(products_df_detailed)
-    #creator = ImageGridCreator(grid_size=(800, 800))
-    #result_image = creator.save_grid(products_df_rank, OUTPUT_PATH)
+    creator = ImageGridCreator(grid_size=(800, 800))
+    result_image = creator.save_grid(products_df_rank, OUTPUT_PATH)
 
 

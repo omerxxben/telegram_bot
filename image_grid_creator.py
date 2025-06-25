@@ -145,16 +145,16 @@ class ImageGridCreator:
 
     def create_grid(self, image_urls: List[str]) -> Image.Image:
         """
-        Create a 2x2 grid from 4 image URLs with medals
+        Create a 2x2 grid from up to 4 image URLs with medals.
 
         Args:
-            image_urls: List of 4 image URLs
+            image_urls: List of up to 4 image URLs
 
         Returns:
             PIL Image object of the final grid
         """
-        if len(image_urls) != 4:
-            raise ValueError("Exactly 4 image URLs are required")
+        # Pad the list to 4 elements with None
+        image_urls = image_urls[:4] + [None] * (4 - len(image_urls))
 
         # Calculate individual image size (half of grid size)
         individual_width = self.grid_size[0] // 2
@@ -164,7 +164,13 @@ class ImageGridCreator:
         # Download and resize images
         images = []
         for url in image_urls:
-            img = self.download_image(url)
+            if url:
+                img = self.download_image(url)
+            else:
+                # Generate placeholder image for missing slots
+                img = Image.new('RGB', (400, 300), color='lightgray')
+                draw = ImageDraw.Draw(img)
+                draw.text((200, 150), "No Image", fill='black', anchor='mm')
             img = self.resize_image_to_fit(img, individual_size)
             images.append(img)
 
@@ -181,7 +187,6 @@ class ImageGridCreator:
 
         # Paste images and add medals
         for i, (img, pos) in enumerate(zip(images, positions)):
-            # Paste the image
             grid_image.paste(img, pos)
 
             # Create and paste medal (made bigger)
@@ -189,9 +194,9 @@ class ImageGridCreator:
             medal_x = pos[0] + individual_width - medal.width - 10
             medal_y = pos[1] + 10
             if i == 3:  # 4th place (index 3)
-                medal_x = pos[0] + individual_width - medal.width - 3  # Change this number
-                medal_y = pos[1] - 5  # Change this number
-            # Paste medal with transparency
+                medal_x = pos[0] + individual_width - medal.width - 3
+                medal_y = pos[1] - 5
+
             if medal.mode == 'RGBA':
                 grid_image.paste(medal, (medal_x, medal_y), medal)
             else:
@@ -199,7 +204,8 @@ class ImageGridCreator:
 
         return grid_image
 
-    def save_grid(self, df: pd.DataFrame, output_path: str = "image_grid.jpg", image_column: str = "product_main_image_url"):
+    def save_grid(self, df: pd.DataFrame, output_path: str = "image_grid.jpg",
+                  image_column: str = "product_main_image_url"):
         image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)
         grid_image.save(output_path, quality=95)

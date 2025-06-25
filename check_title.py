@@ -1,3 +1,5 @@
+import pandas as pd
+
 from ai_manager import AIManager
 
 class CheckTitle:
@@ -20,6 +22,8 @@ class CheckTitle:
             offset += batch_size
 
         print(f"Total tokens used - Prompt: {total_input_tokens}, Completion: {total_output_tokens}")
+        if not final_numbers:
+            return pd.DataFrame()
         top_indices = final_numbers[:4]
         filtered_df = products_df.iloc[top_indices].reset_index(drop=True)
         return filtered_df
