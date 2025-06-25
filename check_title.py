@@ -1,7 +1,5 @@
-from numpy.ma.core import maximum
 from openai import OpenAI
 import json
-
 from GLOBAL_CONST import API_KEY_OPEN_AI
 
 
@@ -11,23 +9,30 @@ class CheckTitle:
         final_numbers = []
         batch_size = 10
         offset = 0
+        total_input_tokens = 0
+        total_output_tokens = 0
+
         while offset < len(title_list) and len(final_numbers) < 4:
+            print(f"Checking titles of rows {offset + 1} to {min(offset + batch_size, len(title_list))}")
             batch = title_list[offset:offset + batch_size]
-            result = ProductMatcher().find_suitable_titles(product_name, batch)
+            result, input_tokens, output_tokens = ProductMatcher().find_suitable_titles(product_name, batch)
+            total_input_tokens += input_tokens
+            total_output_tokens += output_tokens
             adjusted_result = [i + offset for i in result]
             final_numbers.extend(adjusted_result)
             offset += batch_size
+
+        print(f"Total tokens used - Prompt: {total_input_tokens}, Completion: {total_output_tokens}")
         top_indices = final_numbers[:4]
         filtered_df = products_df.iloc[top_indices].reset_index(drop=True)
         return filtered_df
-
 
 
 class ProductMatcher:
     def __init__(self):
         self.client = OpenAI(api_key=API_KEY_OPEN_AI)
 
-    def check_all_titles(self, search_query: str, product_titles: list) -> dict:
+    def check_all_titles(self, search_query: str, product_titles: list):
         titles_text = "\n".join([f"{i}: {title}" for i, title in enumerate(product_titles)])
         try:
             response = self.client.chat.completions.create(
@@ -42,68 +47,44 @@ class ProductMatcher:
                         "content": f"Search query: \"{search_query}\"\n\nProduct titles to analyze:\n{titles_text}\n\nReturn JSON with 0 for relevant titles, 1 for irrelevant titles:"
                     }
                 ],
-                max_tokens=800,
+                max_tokens=1200,
                 temperature=0.1
             )
 
             result = response.choices[0].message.content.strip()
-            print(f"Raw API response: '{result}'")  # Debug: see what we actually got
-
             if not result:
                 print("Error: Empty response from API")
-                return {}
+                return {}, {"prompt_tokens": 0, "completion_tokens": 0}
 
-            # Remove markdown code block formatting if present
             if result.startswith("```json"):
-                result = result[7:]  # Remove ```json
+                result = result[7:]
             if result.startswith("```"):
-                result = result[3:]  # Remove ```
+                result = result[3:]
             if result.endswith("```"):
-                result = result[:-3]  # Remove trailing ```
+                result = result[:-3]
             result = result.strip()
-
             try:
-                return json.loads(result)
+                parsed = json.loads(result)
+                usage = {
+                    "prompt_tokens": response.usage.prompt_tokens if response.usage else 0,
+                    "completion_tokens": response.usage.completion_tokens if response.usage else 0
+                }
+                return parsed, usage
             except json.JSONDecodeError as json_error:
                 print(f"JSON parsing error: {json_error}")
                 print(f"Failed to parse: '{result}'")
-                return {}
-
+                return {}, {"prompt_tokens": 0, "completion_tokens": 0}
         except Exception as e:
             print(f"Error checking titles: {str(e)}")
-            return {}
+            return {}, {"prompt_tokens": 0, "completion_tokens": 0}
 
-    def find_suitable_titles(self, search_query: str, product_titles: list) -> list:
-        """
-        Find 3 suitable product titles for the given search query.
-
-        Args:
-            search_query (str): The search query
-            product_titles (list): List of all product titles from AliExpress
-
-        Returns:
-            list: Indexes of suitable titles (up to 3)
-        """
+    def find_suitable_titles(self, search_query: str, product_titles: list):
         if not product_titles:
-            print("No product titles provided")
-            return []
+            return [], 0, 0
 
-        # Check all titles at once
-        results = self.check_all_titles(search_query, product_titles)
-
+        results, usage = self.check_all_titles(search_query, product_titles)
         if not results:
-            print("Failed to get results from AI model")
-            return []
+            return [], usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
 
-        print(f"AI returned: {results}")  # Debug output
-
-        # Extract suitable indexes (where value is 0)
-        suitable_indexes = []
-        for idx_str, value in results.items():
-            idx = int(idx_str)
-            if value == 0:
-                suitable_indexes.append(idx)
-                print(f"Found suitable at index {idx}: {product_titles[idx]}")  # Debug output
-
-        # Return first 3 suitable indexes
-        return suitable_indexes[:4]
+        suitable_indexes = [int(idx_str) for idx_str, value in results.items() if value == 0]
+        return suitable_indexes[:4], usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)

@@ -19,8 +19,8 @@ if __name__ == "__main__":
     products_df = ProductsTransform().transform_to_table(products)
     #products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
     products_df_rank = getRank().sort_by_volume(products_df)
+    #pretty_print_df(products_df_rank)
     products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
-
     pretty_print_df(products_df_filtered_by_title)
 
     #products_df_detailed = AliExpressApiProducts().process(products_df)
