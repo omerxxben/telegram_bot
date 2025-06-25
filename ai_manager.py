@@ -49,6 +49,42 @@ class AIManager:
         return response.strip()
 
     # ================================ Public methods ================================
+
+    def match_category(self, product_name: str, category_variations: list) -> str:
+        if not category_variations:
+            return "Error: No category variations provided"
+
+        # Format the variations for the prompt
+        variations_text = "\n".join([f"variation {i + 1}: {cat}" for i, cat in enumerate(category_variations)])
+
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a product categorization expert. Given a product name and a list of category variations in the format 'first_level:second_level', you must select the BEST matching category. Return ONLY the exact category string from the provided variations, nothing else."
+            },
+            {
+                "role": "user",
+                "content": f"Product name: {product_name}\n\nAvailable category variations:\n{variations_text}\n\nSelect the best matching category:"
+            }
+        ]
+
+        result, usage = self._make_ai_request(messages, max_tokens=100, temperature=0.1)
+
+        if not result:
+            return f"Categorization error: Empty response"
+
+        # Validate that the result is one of the provided variations
+        if result in category_variations:
+            return result
+        else:
+            # If not exact match, find the closest one
+            for variation in category_variations:
+                if variation in result or result in variation:
+                    return variation
+            # Fallback to first variation if no match found
+            return category_variations[0]
+            
+    
     def translate_hebrew_query(self, hebrew_query: str) -> str:
         # Check if query starts with "חפש לי"
         if not hebrew_query.strip().startswith("חפש לי"):

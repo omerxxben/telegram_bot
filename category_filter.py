@@ -1,6 +1,4 @@
-from openai import OpenAI
-
-from GLOBAL_CONST import API_KEY_OPEN_AI
+from ai_manager import AIManager
 
 
 class CategoryFilter:
@@ -33,49 +31,4 @@ class CategoryFilter:
         category_list = list(category_set)
         if not category_list:
             return None
-        matcher = self.CategoryMatcher()
-        return matcher.match_category(product_name_english, category_list)
-
-    class CategoryMatcher:
-        def __init__(self):
-            self.client = OpenAI(api_key=API_KEY_OPEN_AI)
-
-        def match_category(self, product_name: str, category_variations: list) -> str:
-            if not category_variations:
-                return "Error: No category variations provided"
-
-            # Format the variations for the prompt
-            variations_text = "\n".join([f"variation {i + 1}: {cat}" for i, cat in enumerate(category_variations)])
-
-            try:
-                response = self.client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a product categorization expert. Given a product name and a list of category variations in the format 'first_level:second_level', you must select the BEST matching category. Return ONLY the exact category string from the provided variations, nothing else."
-                        },
-                        {
-                            "role": "user",
-                            "content": f"Product name: {product_name}\n\nAvailable category variations:\n{variations_text}\n\nSelect the best matching category:"
-                        }
-                    ],
-                    max_tokens=100,
-                    temperature=0.1
-                )
-
-                result = response.choices[0].message.content.strip()
-
-                # Validate that the result is one of the provided variations
-                if result in category_variations:
-                    return result
-                else:
-                    # If not exact match, find the closest one
-                    for variation in category_variations:
-                        if variation in result or result in variation:
-                            return variation
-                    # Fallback to first variation if no match found
-                    return category_variations[0]
-
-            except Exception as e:
-                return f"Categorization error: {str(e)}"
+        return AIManager().match_category(product_name_english, category_list)
