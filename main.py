@@ -6,17 +6,18 @@ from ali_epress_api import AliExpressApi
 from get_rank import getRank
 from image_grid_creator import ImageGridCreator
 from products_transform import ProductsTransform
+from ai_manager import AIManager
 
 if __name__ == "__main__":
     #OUTPUT_PATH = r"C:\Users\User\OneDrive\שולחן העבודה\images\grid.jpg"
     OUTPUT_PATH = r"C:\Users\User\Desktop\images\grid.jpg"
     #print(json.dumps(products, indent=4, ensure_ascii=False))
-    #product_name_hebrew = "רמקול"
-    #product_name_english = Translate.process(product_name_hebrew)
-    product_name_english = "jbl flip 6"
-    products = AliExpressApi().process(product_name_english,  50)
-    products_df = ProductsTransform().transform_to_table(products)
-    products_df_rank = getRank().sort_by_volume(products_df)
+    search_query = "חפש לי jbl flip 6"
+    product_name_english = AIManager().translate_hebrew_query(search_query)
+    products = AliExpressApi().process(product_name_english,  60)
+    #products_df = ProductsTransform().transform_to_table(products)
+    #products_df_relevant_category = CategoryFilter().filter(products_df, product_name_english)
+    products_df_rank = getRank().sort_by_volume(products)
     #pretty_print_df(products_df_rank)
     products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
     pretty_print_df(products_df_filtered_by_title)

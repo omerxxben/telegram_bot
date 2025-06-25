@@ -56,10 +56,17 @@ class AIManager:
             return ""
         
         # Extract the product name (remove "חפש לי" prefix)
-        product_hebrew = hebrew_query.strip()[6:].strip()  # 6 characters for "חפש לי "
+        product_text = hebrew_query.strip()[6:].strip()  # 6 characters for "חפש לי "
         
-        if not product_hebrew:
+        if not product_text:
             return ""
+        
+        # Check if the product text is already in English (basic check for Hebrew characters)
+        has_hebrew = any('\u0590' <= char <= '\u05FF' for char in product_text)
+        
+        # If no Hebrew characters found, assume it's already English
+        if not has_hebrew:
+            return product_text.strip().lower()
         
         messages = [
             {
@@ -68,7 +75,7 @@ class AIManager:
             },
             {
                 "role": "user",
-                "content": f"Translate this Hebrew product name to English: {product_hebrew}"
+                "content": f"Translate this Hebrew product name to English: {product_text}"
             }
         ]
 
