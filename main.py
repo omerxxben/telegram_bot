@@ -1,6 +1,5 @@
 import json
 from ali_epress_api_products import AliExpressApiProducts
-from category_filter import CategoryFilter
 from check_title import CheckTitle
 from general_tools import pretty_print_df
 from ali_epress_api import AliExpressApi
