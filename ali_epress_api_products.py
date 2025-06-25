@@ -12,13 +12,6 @@ import threading
 
 class AliExpressApiProducts:
     def __init__(self, max_workers: int = 10, rate_limit_delay: float = 0.1):
-        """
-        Initialize with threading configuration
-
-        Args:
-            max_workers: Maximum number of concurrent threads
-            rate_limit_delay: Delay between requests in seconds to avoid rate limiting
-        """
         self.max_workers = max_workers
         self.rate_limit_delay = rate_limit_delay
         self._rate_limit_lock = threading.Lock()
@@ -29,13 +22,8 @@ class AliExpressApiProducts:
         products_df['avg_evaluation_rating'] = None
         products_df['sales_count'] = None
         products_df['evaluation_count'] = None
-
-        # Create a list of (index, product_id) tuples for threading
         tasks = [(index, str(row['product_id'])) for index, row in products_df.iterrows()]
-
         print(f"Processing {len(tasks)} products with {self.max_workers} threads...")
-
-        # Use ThreadPoolExecutor for concurrent API calls
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all tasks
             future_to_task = {
@@ -133,34 +121,15 @@ class AliExpressApiProducts:
             return {"error": f"Unexpected error: {str(e)}"}
 
     def _parse_count(self, count_str) -> str or None:
-        """
-        Parse count strings preserving original formatting including '+' suffix and commas
-
-        Args:
-            count_str: String or number to parse
-
-        Returns:
-            String value preserving original format, or None if parsing fails
-        """
         if count_str is None:
             return None
-
         try:
-            # If it's already an integer, convert to string
             if isinstance(count_str, int):
                 return str(count_str)
-
-            # Convert to string and strip whitespace, but keep everything else as-is
             return str(count_str).strip()
-
         except (ValueError, TypeError):
             return None
-
     def generate_signature(self, params: dict) -> str:
         sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))
         sign_str = f"{DS_APP_SECRET}{sorted_params}{DS_APP_SECRET}"
         return hashlib.md5(sign_str.encode('utf-8')).hexdigest().upper()
-
-# Usage example:
-# api = AliExpressApiProducts(max_workers=5, rate_limit_delay=0.2)  # 5 threads, 200ms delay
-# result_df = api.process(your_products_df)
