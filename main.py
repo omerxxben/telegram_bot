@@ -14,9 +14,9 @@ if __name__ == "__main__":
     #print(json.dumps(products, indent=4, ensure_ascii=False))
     search_query = "חפש לי jbl flip 6"
     product_name_english = AIManager().translate_hebrew_query(search_query)
-    products = AliExpressApi().process(product_name_english,  60)
-    #products_df = ProductsTransform().transform_to_table(products)
-    products_df_rank = getRank().sort_by_volume(products)
+    products = AliExpressApi().process(product_name_english,  50)
+    products_df = ProductsTransform().transform_to_table(products)
+    products_df_rank = getRank().sort_by_volume(products_df)
     #pretty_print_df(products_df_rank)
     products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
     pretty_print_df(products_df_filtered_by_title)
