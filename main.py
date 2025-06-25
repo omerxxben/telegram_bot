@@ -22,11 +22,8 @@ if __name__ == "__main__":
     #pretty_print_df(products_df_rank)
     products_df_filtered_by_title = CheckTitle().check(product_name_english, products_df_rank)
     pretty_print_df(products_df_filtered_by_title)
-
-    #products_df_detailed = AliExpressApiProducts().process(products_df)
-
+    products_df_detailed = AliExpressApiProducts().process(products_df)
     #products_df_rank = getRank().calculate(products_df_detailed)
-    #products_df_relevant = CheckRelevant().check(products_df_rank)
     #creator = ImageGridCreator(grid_size=(800, 800))
     #result_image = creator.save_grid(products_df_rank, OUTPUT_PATH)
 
