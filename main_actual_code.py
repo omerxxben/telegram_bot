@@ -1,5 +1,6 @@
 import json
 
+from Classes.ale_express_api_short_link import AliExpressApiShortLink
 from Classes.ali_epress_api_products import AliExpressApiProducts
 from Classes.general_tools import pretty_print_df
 from Classes.ali_epress_api import AliExpressApi
@@ -23,6 +24,7 @@ class MainProducts:
         if len(products_df) == 0:
             return [], "no image found"
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
+        products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
         image_base_64 = creator.save_grid(products_df_detailed)
         selected_columns = [
             "target_sale_price",
@@ -58,7 +60,7 @@ if __name__ == "__main__":
         "image_base_64": image_base_64,
         "products_list": transformed_products
     }
-    print(json.dumps(response, indent=2, ensure_ascii=False))
+    #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
 
 
