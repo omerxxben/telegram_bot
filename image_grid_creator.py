@@ -165,21 +165,37 @@ class ImageGridCreator:
         # 2 images case: unchanged, but swap positions (1st right, 2nd left) with medals top-right with padding 20px
         if num_images == 2:
             individual_size = (self.grid_size[0] // 2, self.grid_size[1])
-            images = [self.resize_image_to_fit(self.download_image(url), individual_size) for url in image_urls]
+
+            images = []
+            for url in image_urls:
+                img = self.download_image(url)
+                img = self.resize_image_to_fit(img, individual_size)
+                images.append(img)
+
             grid_image = Image.new('RGB', self.grid_size, 'white')
+
+            # Positions: 1st place right, 2nd place left
             positions = [
                 (self.grid_size[0] // 2, 0),  # 1st place - right half
                 (0, 0),  # 2nd place - left half
             ]
+
             for i, (img, pos) in enumerate(zip(images, positions)):
                 grid_image.paste(img, pos)
                 medal = self.create_medal(i + 1, size=80)
-                medal_x = pos[0] + individual_size[0] - medal.width - 200
-                medal_y = pos[1] + 20
+
+                # Medal position:
+                # X = image right edge - medal width - 20 px padding
+                medal_x = pos[0] + individual_size[0] - medal.width - 20
+
+                # Y = image top + 20 px padding
+                medal_y = pos[1] + 200
+
                 if medal.mode == 'RGBA':
                     grid_image.paste(medal, (medal_x, medal_y), medal)
                 else:
                     grid_image.paste(medal, (medal_x, medal_y))
+
             return grid_image
 
         # 3 images case: first two on top row (half width each), third centered on bottom row
