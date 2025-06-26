@@ -48,9 +48,9 @@ class ProductsTransform:
     def transform_product_names(self, product):
         return {
             "rating": product.get("avg_evaluation_rating"),
-            "reviews_count": int(product.get("evaluation_count", 0)),
+            "reviews_count": product.get("evaluation_count"),
             "product_title": product.get("subject"),
-            "sales_count": int(product.get("sales_count", 0)),
-            "price": float(product.get("target_sale_price", 0)),
+            "sales_count": product.get("sales_count"),
+            "price": product.get("target_sale_price"),
             "affiliate_link": product.get("promotion_link")
         }
