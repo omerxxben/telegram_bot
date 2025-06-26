@@ -275,15 +275,12 @@ class ImageGridCreator:
 
         return grid_image
 
-    def save_grid(self, df: pd.DataFrame, output_path: str,
+    def save_grid(self, df: pd.DataFrame,
                   image_column: str = "product_main_image_url"):
         if df.empty:
             default_url = "https://cloudinary-marketing-res.cloudinary.com/images/w_1000,c_scale/v1679921049/Image_URL_header/Image_URL_header-png?_i=AA"
             default_image = self.download_image(default_url)
-            default_image.save(output_path, quality=95)
             return default_image
         image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)
-        grid_image.save(output_path, quality=95)
-        print(f"Grid image saved as {output_path}")
         return grid_image

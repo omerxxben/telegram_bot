@@ -12,11 +12,8 @@ app = Flask(__name__)
 @app.route("/get-cost", methods=["GET"])
 def get_cost():
     try:
-        OUTPUT_PATH = "images/grid.jpg"  # must exist or be created on Render
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
-
-        # Get Hebrew query from query parameter or use default
         search_query = request.args.get("query", "חפש לי שלט לפלייסטישן 5")
         product_name_english = ai_manager.translate_hebrew_query(search_query)
 
@@ -24,7 +21,7 @@ def get_cost():
         products_df = ProductsTransform().transform_to_table(products)
 
         if len(products_df) == 0:
-            creator.save_grid(products_df, OUTPUT_PATH)
+            creator.save_grid(products_df)
             return jsonify({"message": "No products found", "total_cost": 0.0})
 
         products_df_rank = getRank().sort_by_volume(products_df)
