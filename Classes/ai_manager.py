@@ -162,7 +162,7 @@ class AIManager:
             return pd.DataFrame()
 
         suitable_indexes = [int(idx_str) for idx_str, value in results.items() if value == 0]
-        top_indices = suitable_indexes[:4]
+        top_indices = suitable_indexes
         
         if not top_indices:
             return pd.DataFrame()

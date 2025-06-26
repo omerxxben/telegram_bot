@@ -15,7 +15,7 @@ class MainProducts:
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
         product_name_english = ai_manager.translate_hebrew_query(search_query)
-        products = AliExpressApi().process(product_name_english, 1)
+        products = AliExpressApi().process(product_name_english, 50)
         products_df = ProductsTransform().transform_to_table(products)
         if len(products_df) == 0:
             return [], "no image found"
