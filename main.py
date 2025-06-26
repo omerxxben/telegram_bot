@@ -6,7 +6,6 @@ from get_rank import getRank
 from image_grid_creator import ImageGridCreator
 from products_transform import ProductsTransform
 from ai_manager import AIManager
-
 app = Flask(__name__)
 
 
