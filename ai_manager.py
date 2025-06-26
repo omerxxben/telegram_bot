@@ -1,41 +1,73 @@
 import json
-from openai import OpenAI
-from GLOBAL_CONST import API_KEY_OPEN_AI
+import pandas as pd
+import time
+from google import genai
+from google.genai import types
+from GLOBAL_CONST import GEMINI_API_KEY
 from typing import List, Tuple, Dict, Any
 
 
 class AIManager:
     
     def __init__(self):
-        self.client = OpenAI(api_key=API_KEY_OPEN_AI)
+        self.client = genai.Client(api_key=GEMINI_API_KEY)
         self.total_tokens_used = {"prompt_tokens": 0, "completion_tokens": 0}
+        self.total_runtime = 0.0
 
     # ================================ Internal methods ================================
 
-    def _make_ai_request(self, messages: List[Dict[str, str]], max_tokens: int = 100, temperature: float = 0.1, model: str = "gpt-4o-mini") -> Tuple[str, Dict[str, int]]:
+    def _make_ai_request(self, messages: List[Dict[str, str]], max_tokens: int = 100, temperature: float = 0.1, model: str = "gemini-2.5-flash-lite-preview-06-17") -> Tuple[str, int, int, float]:
+        start_time = time.time()
+        
         try:
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=messages,
-                max_tokens=max_tokens,
+            # Convert OpenAI message format to Gemini content format
+            contents = []
+            for message in messages:
+                role = "user" if message["role"] in ["user", "system"] else "model"
+                content = types.Content(
+                    role=role,
+                    parts=[types.Part.from_text(text=message["content"])]
+                )
+                contents.append(content)
+            
+            # Create configuration
+            generate_content_config = types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                response_mime_type="text/plain",
+                max_output_tokens=max_tokens,
                 temperature=temperature
             )
 
-            result = response.choices[0].message.content.strip()
-            usage = {
-                "prompt_tokens": response.usage.prompt_tokens if response.usage else 0,
-                "completion_tokens": response.usage.completion_tokens if response.usage else 0
-            }
+            # Make the request
+            response = self.client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=generate_content_config
+            )
+
+            result = response.text.strip() if response.text else ""
+            
+            # Gemini doesn't provide detailed token usage like OpenAI, so we'll estimate
+            # Based on rough character count estimation (1 token ≈ 4 characters)
+            prompt_text = " ".join([msg["content"] for msg in messages])
+            estimated_prompt_tokens = len(prompt_text) // 4
+            estimated_completion_tokens = len(result) // 4
+            
+            # Calculate runtime
+            runtime = time.time() - start_time
             
             # Track total usage
-            self.total_tokens_used["prompt_tokens"] += usage["prompt_tokens"]
-            self.total_tokens_used["completion_tokens"] += usage["completion_tokens"]
+            self.total_tokens_used["prompt_tokens"] += estimated_prompt_tokens
+            self.total_tokens_used["completion_tokens"] += estimated_completion_tokens
+            self.total_runtime += runtime
             
-            return result, usage
+            return result
 
         except Exception as e:
+            runtime = time.time() - start_time
+            self.total_runtime += runtime
             print(f"Error making AI request: {str(e)}")
-            return "", {"prompt_tokens": 0, "completion_tokens": 0}
+            return "", 0, 0, runtime
 
     # =================================================================================
 
@@ -79,7 +111,7 @@ class AIManager:
             }
         ]
 
-        result, usage = self._make_ai_request(messages, max_tokens=50, temperature=0.1)
+        result = self._make_ai_request(messages, max_tokens=50, temperature=0.1)
         
         if not result:
             return ""
@@ -87,7 +119,7 @@ class AIManager:
         # Clean up and return the translation
         return result.strip().lower()
 
-    def check_titles_relevance(self, search_query: str, product_titles: List[str]) -> Tuple[Dict[str, int], Dict[str, int]]:
+    def check_titles_relevance(self, search_query: str, product_titles: List[str]) -> Dict[str, int]:
         titles_text = "\n".join([f"{i}: {title}" for i, title in enumerate(product_titles)])
         
         messages = [
@@ -101,59 +133,41 @@ class AIManager:
             }
         ]
 
-        result, usage = self._make_ai_request(messages, max_tokens=1200, temperature=0.1)
+        result = self._make_ai_request(messages, max_tokens=2500, temperature=0.1)
         
         if not result:
             print("Error: Empty response from API")
-            return {}, {"prompt_tokens": 0, "completion_tokens": 0}
+            return {}
 
         # Clean up the response
         result = self._clean_json_response(result)
         
         try:
             parsed = json.loads(result)
-            return parsed, usage
+            return parsed
         except json.JSONDecodeError as json_error:
             print(f"JSON parsing error: {json_error}")
             print(f"Failed to parse: '{result}'")
-            return {}, {"prompt_tokens": 0, "completion_tokens": 0}
+            return {}
 
 
+    def get_suitable_titles(self, product_name, products_df) -> pd.DataFrame:
+        title_list = list(products_df['product_title'])
+        
+        if not title_list:
+            return pd.DataFrame()
 
-    def find_suitable_titles(self, search_query: str, product_titles: List[str]) -> Tuple[List[int], int, int]:
-        if not product_titles:
-            return [], 0, 0
-
-        results, usage = self.check_titles_relevance(search_query, product_titles)
+        results = self.check_titles_relevance(product_name, title_list)
         if not results:
-            return [], usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+            return pd.DataFrame()
 
         suitable_indexes = [int(idx_str) for idx_str, value in results.items() if value == 0]
-        return suitable_indexes[:4], usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
-
-
-
-    def get_token_usage_summary(self) -> str:
-        prompt_tokens = self.total_tokens_used["prompt_tokens"]
-        completion_tokens = self.total_tokens_used["completion_tokens"]
-        total_tokens = prompt_tokens + completion_tokens
+        top_indices = suitable_indexes[:4]
         
-        # Rough cost calculation (GPT-4o-mini pricing as of 2024)
-        prompt_cost = prompt_tokens * 0.00015 / 1000  # $0.15 per 1K prompt tokens
-        completion_cost = completion_tokens * 0.0006 / 1000  # $0.60 per 1K completion tokens
-        total_cost = prompt_cost + completion_cost
-        
-        return (
-            f"Token Usage Summary:\n"
-            f"  Prompt tokens: {prompt_tokens:,}\n"
-            f"  Completion tokens: {completion_tokens:,}\n"
-            f"  Total tokens: {total_tokens:,}\n"
-            f"  Estimated cost: ${total_cost:.4f}"
-        )
-
-
-
-    def reset_token_usage(self) -> None:
-        self.total_tokens_used = {"prompt_tokens": 0, "completion_tokens": 0} 
-
+        if not top_indices:
+            return pd.DataFrame()
+            
+        filtered_df = products_df.iloc[top_indices].reset_index(drop=True)
+        return filtered_df
+    
     # =================================================================================
