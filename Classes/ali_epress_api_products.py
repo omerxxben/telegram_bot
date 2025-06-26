@@ -2,12 +2,12 @@ import json
 
 import requests
 import hashlib
-from GLOBAL_CONST import *
 import time
 import pandas as pd
 from typing import Dict, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+from Classes.GLOBAL_CONST import *
 
 
 class AliExpressApiProducts:

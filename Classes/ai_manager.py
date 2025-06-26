@@ -3,7 +3,7 @@ import pandas as pd
 import time
 from google import genai
 from google.genai import types
-from GLOBAL_CONST import GEMINI_API_KEY
+from Classes.GLOBAL_CONST import GEMINI_API_KEY
 from typing import List, Tuple, Dict, Any
 
 

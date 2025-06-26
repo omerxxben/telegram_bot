@@ -3,7 +3,7 @@ import requests
 import hashlib
 import time
 
-from GLOBAL_CONST import *
+from Classes.GLOBAL_CONST import *
 
 
 class AliExpressApi:
