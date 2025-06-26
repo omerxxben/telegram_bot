@@ -10,7 +10,7 @@ from ai_manager import AIManager
 if __name__ == "__main__":
     creator = ImageGridCreator(grid_size=(800, 800))
     ai_manager = AIManager()
-    search_query = "חפש לי שלט לפלייסטישן 5"
+    search_query = "חפש לי שעון"
     product_name_english = ai_manager.translate_hebrew_query(search_query)
     products = AliExpressApi().process(product_name_english,  49)
     products_df = ProductsTransform().transform_to_table(products)
