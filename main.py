@@ -16,27 +16,20 @@ def get_cost():
         ai_manager = AIManager()
         search_query = request.args.get("query", "חפש לי שלט לפלייסטישן 5")
         product_name_english = ai_manager.translate_hebrew_query(search_query)
-
         products = AliExpressApi().process(product_name_english, 49)
         products_df = ProductsTransform().transform_to_table(products)
-
         if len(products_df) == 0:
             creator.save_grid(products_df)
             return jsonify({"message": "No products found", "total_cost": 0.0})
-
         products_df_rank = getRank().sort_by_volume(products_df)
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
-
-        creator.save_grid(products_df_detailed, OUTPUT_PATH)
-
-        # Cost calculation
+        creator.save_grid(products_df_detailed)
         input_tokens = ai_manager.total_tokens_used['prompt_tokens']
         output_tokens = ai_manager.total_tokens_used['completion_tokens']
         input_cost = input_tokens * 0.0001 / 1000
         output_cost = output_tokens * 0.0004 / 1000
         total_cost = input_cost + output_cost
-
         return jsonify({
             "message": "Success",
             "total_cost": round(total_cost, 6),
