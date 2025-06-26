@@ -1,6 +1,6 @@
 import requests
 
-def get_cost(product_name="חפש לי שלט לפלייסטישן 5"):
+def get_cost(product_name="חפש לי jbl flip 6"):
     url = "https://telegram-bot-1-q869.onrender.com/get-cost"
     params = {"product_name": product_name}
 

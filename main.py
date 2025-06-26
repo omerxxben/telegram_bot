@@ -23,6 +23,9 @@ def get_cost():
             return jsonify({"message": "No products found", "total_cost": 0.0})
         products_df_rank = getRank().sort_by_volume(products_df)
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
+        if len(products_df) == 0:
+            image_base_64 = creator.save_grid(products_df)
+            return jsonify({"message": "No products found", "total_cost": 0.0})
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         image_base_64 = creator.save_grid(products_df_detailed)
         selected_columns = [
