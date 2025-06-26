@@ -44,3 +44,13 @@ class ProductsTransform:
         except Exception as e:
             print(f"Error transforming data: {e}")
             return pd.DataFrame(columns=self.columns)
+
+    def transform_product_names(self, product):
+        return {
+            "rating": product.get("avg_evaluation_rating"),
+            "reviews_count": int(product.get("evaluation_count", 0)),
+            "product_title": product.get("subject"),
+            "sales_count": int(product.get("sales_count", 0)),
+            "price": float(product.get("target_sale_price", 0)),
+            "affiliate_link": product.get("promotion_link")
+        }

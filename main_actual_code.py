@@ -1,3 +1,5 @@
+import json
+
 from Classes.ali_epress_api_products import AliExpressApiProducts
 from Classes.general_tools import pretty_print_df
 from Classes.ali_epress_api import AliExpressApi
@@ -27,7 +29,8 @@ class MainProducts:
             "avg_evaluation_rating",
             "sales_count",
             "evaluation_count",
-            "subject"
+            "subject",
+            "promotion_link"
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")
@@ -48,4 +51,14 @@ class MainProducts:
 
 if __name__ == "__main__":
     products_list, image_base_64 = MainProducts().process("חפש לי jbl flip 6", True)
-    print(products_list)
+    transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
+    number_of_products = len(transformed_products)
+    response = {
+        "number_of_products": number_of_products,
+        "image_base_64": image_base_64,
+        "products_list": transformed_products
+    }
+    print(json.dumps(response, indent=2, ensure_ascii=False))
+    #print(products_list)
+
+
