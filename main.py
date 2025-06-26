@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if len(products) != 0:
         products_df_rank = getRank().sort_by_volume(products_df)
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
-        products_df_detailed = AliExpressApiProducts().process(products_df_rank)
+        products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         pretty_print_df(products_df_detailed)
         creator = ImageGridCreator(grid_size=(800, 800))
         result_image = creator.save_grid(products_df_detailed, OUTPUT_PATH)
