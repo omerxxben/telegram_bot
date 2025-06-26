@@ -1,12 +1,6 @@
 from flask import Flask, request, jsonify
-from ali_epress_api_products import AliExpressApiProducts
-from general_tools import pretty_print_df
-from ali_epress_api import AliExpressApi
-from get_rank import getRank
-from image_grid_creator import ImageGridCreator
-from main_products import MainProducts
-from products_transform import ProductsTransform
-from ai_manager import AIManager
+from main_actual_code import MainProducts
+
 app = Flask(__name__)
 
 
