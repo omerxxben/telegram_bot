@@ -8,6 +8,7 @@ from GLOBAL_CONST import *
 
 class AliExpressApi:
     def process(self, product_name, number_of_rows):
+        number_of_rows = number_of_rows + 1
         timestamp = int(time.time() * 1000)
         params = {
             "keywords": product_name,

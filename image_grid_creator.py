@@ -144,40 +144,102 @@ class ImageGridCreator:
         return new_image
 
     def create_grid(self, image_urls: List[str]) -> Image.Image:
-        """
-        Create a 2x2 grid from up to 4 image URLs with medals.
+        num_images = len(image_urls)
 
-        Args:
-            image_urls: List of up to 4 image URLs
+        # 1 image case: unchanged
+        if num_images == 1:
+            # same as before...
+            img = self.download_image(image_urls[0])
+            img = self.resize_image_to_fit(img, self.grid_size)
+            grid_image = Image.new('RGB', self.grid_size, 'white')
+            grid_image.paste(img, (0, 0))
+            medal = self.create_medal(1, size=100)
+            medal_x = self.grid_size[0] - medal.width - 20
+            medal_y = 20
+            if medal.mode == 'RGBA':
+                grid_image.paste(medal, (medal_x, medal_y), medal)
+            else:
+                grid_image.paste(medal, (medal_x, medal_y))
+            return grid_image
 
-        Returns:
-            PIL Image object of the final grid
-        """
-        # Pad the list to 4 elements with None
+        # 2 images case: unchanged, but swap positions (1st right, 2nd left) with medals top-right with padding 20px
+        if num_images == 2:
+            individual_size = (self.grid_size[0] // 2, self.grid_size[1])
+            images = [self.resize_image_to_fit(self.download_image(url), individual_size) for url in image_urls]
+            grid_image = Image.new('RGB', self.grid_size, 'white')
+            positions = [
+                (self.grid_size[0] // 2, 0),  # 1st place - right half
+                (0, 0),  # 2nd place - left half
+            ]
+            for i, (img, pos) in enumerate(zip(images, positions)):
+                grid_image.paste(img, pos)
+                medal = self.create_medal(i + 1, size=80)
+                medal_x = pos[0] + individual_size[0] - medal.width - 200
+                medal_y = pos[1] + 20
+                if medal.mode == 'RGBA':
+                    grid_image.paste(medal, (medal_x, medal_y), medal)
+                else:
+                    grid_image.paste(medal, (medal_x, medal_y))
+            return grid_image
+
+        # 3 images case: first two on top row (half width each), third centered on bottom row
+        if num_images == 3:
+            half_width = self.grid_size[0] // 2
+            half_height = self.grid_size[1] // 2
+
+            # Sizes
+            top_size = (half_width, half_height)
+            bottom_size = (half_width, half_height)  # You can adjust width here if you want narrower bottom image
+
+            # Download and resize images
+            images = []
+            for idx, url in enumerate(image_urls):
+                size = top_size if idx < 2 else bottom_size
+                img = self.download_image(url)
+                img = self.resize_image_to_fit(img, size)
+                images.append(img)
+
+            grid_image = Image.new('RGB', self.grid_size, 'white')
+
+            # Positions:
+            positions = [
+                (half_width, 0),  # 1st place - top right
+                (0, 0),  # 2nd place - top left
+                ((self.grid_size[0] - bottom_size[0]) // 2, half_height),  # 3rd place - centered bottom
+            ]
+
+            for i, (img, pos) in enumerate(zip(images, positions)):
+                grid_image.paste(img, pos)
+                medal = self.create_medal(i + 1, size=80)
+                medal_x = pos[0] + img.width - medal.width - 20
+                medal_y = pos[1] + 20
+                if medal.mode == 'RGBA':
+                    grid_image.paste(medal, (medal_x, medal_y), medal)
+                else:
+                    grid_image.paste(medal, (medal_x, medal_y))
+
+            return grid_image
+
+        # 4 images case: default 2x2 grid as before
         image_urls = image_urls[:4] + [None] * (4 - len(image_urls))
 
-        # Calculate individual image size (half of grid size)
         individual_width = self.grid_size[0] // 2
         individual_height = self.grid_size[1] // 2
         individual_size = (individual_width, individual_height)
 
-        # Download and resize images
         images = []
         for url in image_urls:
             if url:
                 img = self.download_image(url)
             else:
-                # Generate placeholder image for missing slots
                 img = Image.new('RGB', (400, 300), color='lightgray')
                 draw = ImageDraw.Draw(img)
                 draw.text((200, 150), "No Image", fill='black', anchor='mm')
             img = self.resize_image_to_fit(img, individual_size)
             images.append(img)
 
-        # Create the final grid image
         grid_image = Image.new('RGB', self.grid_size, 'white')
 
-        # Position images in grid
         positions = [
             (individual_width, 0),  # Top right (1st place)
             (0, 0),  # Top left (2nd place)
@@ -185,18 +247,11 @@ class ImageGridCreator:
             (0, individual_height)  # Bottom left (4th place)
         ]
 
-        # Paste images and add medals
         for i, (img, pos) in enumerate(zip(images, positions)):
             grid_image.paste(img, pos)
-
-            # Create and paste medal (made bigger)
             medal = self.create_medal(i + 1, size=80)
-            medal_x = pos[0] + individual_width - medal.width - 10
-            medal_y = pos[1] + 10
-            if i == 3:  # 4th place (index 3)
-                medal_x = pos[0] + individual_width - medal.width - 3
-                medal_y = pos[1] - 5
-
+            medal_x = pos[0] + individual_width - medal.width - 20
+            medal_y = pos[1] + 20
             if medal.mode == 'RGBA':
                 grid_image.paste(medal, (medal_x, medal_y), medal)
             else:
@@ -204,7 +259,7 @@ class ImageGridCreator:
 
         return grid_image
 
-    def save_grid(self, df: pd.DataFrame, output_path: str = "image_grid.jpg",
+    def save_grid(self, df: pd.DataFrame, output_path: str,
                   image_column: str = "product_main_image_url"):
         image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)

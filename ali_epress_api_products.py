@@ -25,7 +25,6 @@ class AliExpressApiProducts:
         products_df['sales_count'] = None
         products_df['evaluation_count'] = None
         tasks = [(index, str(row['product_id'])) for index, row in products_df.iterrows()]
-        print(f"Processing {len(tasks)} products with {self.max_workers} threads...")
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all tasks
             future_to_task = {
@@ -47,13 +46,9 @@ class AliExpressApiProducts:
                         products_df.at[index, 'evaluation_count'] = eval_count
 
                     completed += 1
-                    if completed % 10 == 0:  # Progress indicator
-                        print(f"  Completed {completed}/{len(tasks)} products")
-
                 except Exception as e:
                     print(f"  ✗ Error processing product {product_id}: {e}")
 
-        print(f"✓ Completed processing all {len(tasks)} products")
         return products_df
 
     def _process_single_product(self, index: int, product_id: str) -> Tuple[float, int, int] or None:
