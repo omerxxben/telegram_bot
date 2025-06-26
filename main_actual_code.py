@@ -15,13 +15,13 @@ class MainProducts:
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
         product_name_english = ai_manager.translate_hebrew_query(search_query)
-        products = AliExpressApi().process(product_name_english, 49)
+        products = AliExpressApi().process(product_name_english, 1)
         products_df = ProductsTransform().transform_to_table(products)
         if len(products_df) == 0:
             return [], "no image found"
         products_df_rank = getRank().sort_by_volume(products_df)
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
-        if len(products_df) == 0:
+        if len(products_df_filtered_by_title) == 0:
             return [], "no image found"
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
