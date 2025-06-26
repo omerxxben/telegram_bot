@@ -1,5 +1,4 @@
 import json
-
 import requests
 import hashlib
 import time
@@ -21,29 +20,31 @@ class AliExpressApiProducts:
         if products_df.empty:
             return pd.DataFrame()
         products_df = products_df.copy()
+        # Add the new 'subject' column
         products_df['avg_evaluation_rating'] = None
         products_df['sales_count'] = None
         products_df['evaluation_count'] = None
+        products_df['subject'] = None  # <-- ADDED
+
         tasks = [(index, str(row['product_id'])) for index, row in products_df.iterrows()]
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            # Submit all tasks
             future_to_task = {
                 executor.submit(self._process_single_product, index, product_id): (index, product_id)
                 for index, product_id in tasks
             }
 
-            # Process completed tasks
             completed = 0
             for future in as_completed(future_to_task):
                 index, product_id = future_to_task[future]
                 try:
                     result = future.result()
                     if result:
-
-                        avg_rating, sales_count, eval_count = result
+                        # Unpack the new tuple with four items
+                        avg_rating, sales_count, eval_count, subject = result  # <-- MODIFIED
                         products_df.at[index, 'avg_evaluation_rating'] = avg_rating
                         products_df.at[index, 'sales_count'] = sales_count
                         products_df.at[index, 'evaluation_count'] = eval_count
+                        products_df.at[index, 'subject'] = subject  # <-- ADDED
 
                     completed += 1
                 except Exception as e:
@@ -51,14 +52,14 @@ class AliExpressApiProducts:
 
         return products_df
 
-    def _process_single_product(self, index: int, product_id: str) -> Tuple[float, int, int] or None:
+    # Update the return type hint to include string for the subject
+    def _process_single_product(self, index: int, product_id: str) -> Tuple[float, str, str, str] or None: # <-- MODIFIED
         """
         Process a single product with rate limiting
 
         Returns:
-            Tuple of (avg_rating, sales_count, eval_count) or None if failed
+            Tuple of (avg_rating, sales_count, eval_count, subject) or None if failed
         """
-        # Rate limiting
         with self._rate_limit_lock:
             current_time = time.time()
             time_since_last = current_time - self._last_request_time
@@ -76,11 +77,14 @@ class AliExpressApiProducts:
                 avg_rating = base_info.get('avg_evaluation_rating')
                 sales_count = base_info.get('sales_count')
                 eval_count = base_info.get('evaluation_count')
+                subject = base_info.get('subject')  # <-- ADDED: Extract the subject
 
+                # Add the subject to the returned tuple
                 return (
                     float(avg_rating) if avg_rating else None,
                     self._parse_count(sales_count),
-                    self._parse_count(eval_count)
+                    self._parse_count(eval_count),
+                    subject # <-- ADDED
                 )
             except (KeyError, ValueError, TypeError) as e:
                 print(f"  ✗ Error extracting data for product {product_id}: {e}")
@@ -110,7 +114,7 @@ class AliExpressApiProducts:
         try:
             response = requests.get(URL, params=params, timeout=30)
             response.raise_for_status()
-
+            # print(response.json()) # This can be commented out to reduce console noise
             return response.json()
         except requests.exceptions.RequestException as e:
             return {"error": f"Request failed: {str(e)}"}
@@ -126,6 +130,7 @@ class AliExpressApiProducts:
             return str(count_str).strip()
         except (ValueError, TypeError):
             return None
+
     def generate_signature(self, params: dict) -> str:
         sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))
         sign_str = f"{DS_APP_SECRET}{sorted_params}{DS_APP_SECRET}"

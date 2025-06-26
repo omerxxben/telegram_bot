@@ -27,7 +27,7 @@ class MainProducts:
             "avg_evaluation_rating",
             "sales_count",
             "evaluation_count",
-            "product_title"
+            "subject"
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")
