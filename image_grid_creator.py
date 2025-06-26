@@ -1,3 +1,5 @@
+import base64
+
 import pandas as pd
 import requests
 from PIL import Image, ImageDraw, ImageFont
@@ -280,7 +282,14 @@ class ImageGridCreator:
         if df.empty:
             default_url = "https://cloudinary-marketing-res.cloudinary.com/images/w_1000,c_scale/v1679921049/Image_URL_header/Image_URL_header-png?_i=AA"
             default_image = self.download_image(default_url)
-            return default_image
+            return self.pil_image_to_base64_str(default_image)
         image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)
-        return grid_image
+        return self.pil_image_to_base64_str(grid_image)
+
+    def pil_image_to_base64_str(self, pil_img: Image.Image, format: str = "PNG") -> str:
+        buffered = io.BytesIO()
+        pil_img.save(buffered, format=format)
+        img_bytes = buffered.getvalue()
+        img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+        return img_b64

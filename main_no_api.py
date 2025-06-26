@@ -22,6 +22,7 @@ if __name__ == "__main__":
     products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
     pretty_print_df(products_df_detailed)
     result_image = creator.save_grid(products_df_detailed)
+    print(result_image)
     print("\n" + "="*50)
     print("AI USAGE STATISTICS")
     print("="*50)
