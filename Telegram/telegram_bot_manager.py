@@ -14,7 +14,7 @@ class TelegramBotManager:
 
         # Template configuration - centralized for easy updates
         self.template_config = {
-            'medal_icons': ['🥇', '🥈', '🥉', '4️⃣'],
+            'medal_icons': self._generate_medal_icons(),
             'cart_icon': '🛒',
             'star_icon': '⭐️',
             'money_bag_icon': '💰',
@@ -39,6 +39,18 @@ class TelegramBotManager:
             'invalid_data': 'שגיאה: נתונים לא חוקיים',
             'search_expired': 'שגיאה: החיפוש פג תוקף. אנא בצע חיפוש חדש.'
         }
+
+    def _generate_medal_icons(self):
+        """Generate medal icons for positions 0-49"""
+        icons = ['🥇', '🥈', '🥉']  # First 3 positions get medals
+        
+        # For positions 4-49, create number emojis
+        for i in range(4, 50):
+            number_str = str(i)
+            emoji_number = ''.join([f'{digit}️⃣' for digit in number_str])
+            icons.append(emoji_number)
+        
+        return icons
 
     def _setup_handlers(self):
         """Setup all bot handlers"""
@@ -170,7 +182,8 @@ class TelegramBotManager:
         # Format caption text
         formatted_products = []
         for i, product in enumerate(page_products):
-            formatted_text = self.format_product_text(product, i)
+            actual_position = start_idx + i
+            formatted_text = self.format_product_text(product, actual_position)
             formatted_products.append(formatted_text)
 
         caption = '\n\n'.join(formatted_products)
