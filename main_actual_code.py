@@ -10,6 +10,7 @@ from Classes.general_tools import pretty_print_df
 from Classes.ali_epress_api import AliExpressApi
 from Classes.get_rank import getRank
 from Classes.image_grid_creator import ImageGridCreator
+from Classes.logger import Logger
 from Classes.products_transform import ProductsTransform
 from Classes.ai_manager import AIManager
 
@@ -57,12 +58,7 @@ class MainProducts:
 
         if IS_LOGS:
             timings['total'] = time.time() - start_time
-            self.log_runtime_and_costs(
-                search_query,
-                product_name_english,
-                products_df_detailed,
-                self.ai_manager,
-                timings,
+            Logger().ali_express_log( search_query, product_name_english, products_df_detailed, self.ai_manager, timings,
             )
 
         transformed_products = [
@@ -73,31 +69,8 @@ class MainProducts:
             "image_bytes_io": image_bytes_io,
             "products_list": transformed_products,
         }
-    def log_runtime_and_costs(self,search_query, product_name_english, products_df_detailed,ai_manager, timings,):
-        print(f"product name hebrew: {search_query}")
-        print(f"product name english: {product_name_english}")
-        pretty_print_df(products_df_detailed)
-
-        print("\n" + "=" * 50)
-        print("AI USAGE STATISTICS")
-        print("=" * 50)
-        print(f"Input tokens: {ai_manager.total_tokens_used['prompt_tokens']}")
-        print(f"Output tokens: {ai_manager.total_tokens_used['completion_tokens']}")
-        print(f"Total runtime of ai: {ai_manager.total_runtime:.3f}s")
-        print(f"Total runtime of get products: {timings['get_products']:.3f}s")
-        print(f"Total runtime of transform to table: {timings['transform_table']:.3f}s")
-        print(f"Total runtime of get details: {timings['get_details']:.3f}s")
-        print(f"Total runtime of get image: {timings['get_image']:.3f}s")
-        print(f"Total runtime of get short link: {timings['get_short_link']:.3f}s")
-        print(f"Total runtime: {timings['total']:.3f}s")
-
-        input_cost = ai_manager.total_tokens_used['prompt_tokens'] * 0.0001 / 1000
-        output_cost = ai_manager.total_tokens_used['completion_tokens'] * 0.0004 / 1000
-        total_cost = input_cost + output_cost
-        print(f"Estimated cost: ${total_cost:.6f}")
-        print("=" * 50)
 if __name__ == "__main__":
     response = MainProducts().process("מטען", True, True)
-    print(response)
+    #print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
