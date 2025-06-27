@@ -212,8 +212,8 @@ class TelegramBotManager:
             formatted_text = self.format_product_text(product, actual_position)
             formatted_products.append(formatted_text)
 
-        caption = '\n\n'.join(formatted_products)
-        caption += f'\n\n{self.template_config["bot_signature"]}'
+        caption = '\n\n\n'.join(formatted_products)
+        caption += f'\n\n\n{self.template_config["bot_signature"]}'
 
         creator = ImageGridCreator(grid_size=(800, 800))
         page_products_pd = pd.DataFrame(page_products)
