@@ -27,7 +27,8 @@ class TelegramBotManager:
             'link_line': '[אייקון_קישור] [קישור_שותף]',
             'bot_signature': 'שמשון מותגים',
             'search_more_button_text': 'חפש עוד תוצאות',
-            'activation_keywords': ['חפש לי', 'מצא לי']
+            'activation_keywords': ['חפש לי', 'מצא לי'],
+            'search_in_process': '✨🔍 מחפש עבורך... אנא המתן'
         }
 
         # Error messages - centralized
@@ -106,11 +107,16 @@ class TelegramBotManager:
             await update.message.reply_text(self.error_messages['no_product_name'])
             return
 
+        # Send "search in process" message
+        search_message = await update.message.reply_text(self.template_config['search_in_process'])
+
         # Perform search
         try:
             search_response = MainProducts().process(product_name)
 
             if not search_response:
+                # Delete search message before sending error
+                await search_message.delete()
                 await update.message.reply_text(self.error_messages['no_results'].format(product_name))
                 return
 
@@ -120,10 +126,15 @@ class TelegramBotManager:
             context.user_data['original_query'] = product_name
             context.user_data['user_id'] = update.effective_user.id
 
+            # Delete search message before sending results
+            await search_message.delete()
+
             # Send first page
             await self.send_product_page(update, context, 0)
 
         except Exception as e:
+            # Delete search message before sending error
+            await search_message.delete()
             await update.message.reply_text("שגיאה בביצוע החיפוש. אנא נסו שוב.")
 
     async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int):
