@@ -27,13 +27,14 @@ class AliExpressApi:
             "sort": "LAST_VOLUME_DESC"
         }
         params["sign"] = self.generate_signature(params)
-        total_time = time.time() - start_time
 
         try:
             response = requests.get(URL, params=params)
             response.raise_for_status()
+            total_time = time.time() - start_time
             return response.json(), total_time
         except Exception as e:
+            total_time = time.time() - start_time
             return [], total_time
 
     def generate_signature(self, params: dict) -> str:
