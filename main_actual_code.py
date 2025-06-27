@@ -9,6 +9,9 @@ from Classes.products_transform import ProductsTransform
 from Classes.ai_manager import AIManager
 
 
+
+
+
 class MainProducts:
     def process(self, search_query, IS_LOGS=True, IS_PRINT_IMAGE=False):
         self.creator = ImageGridCreator(grid_size=(800, 800))
@@ -32,26 +35,15 @@ class MainProducts:
         products_df_detailed, timings['get_details'] = AliExpressApiProducts().process(filtered_df)
         products_df_detailed, timings['get_short_link'] = AliExpressApiShortLink().process(products_df_detailed)
         image_bytes_io, timings['get_image'] = self.creator.save_grid(products_df_detailed, IS_PRINT_IMAGE)
-        selected_columns = [
-            "target_sale_price",
-            "avg_evaluation_rating",
-            "sales_count",
-            "evaluation_count",
-            "subject",
-            "promotion_link",
-        ]
-        filtered_df = products_df_detailed[selected_columns].copy()
-        products_list = filtered_df.to_dict(orient="records")
-        transformed_products = [
-            ProductsTransform().transform_product_names(product) for product in products_list
-        ]
+        products_list = ProductsTransform().parse_to_list(products_df_detailed)
+
         if IS_LOGS:
             timings['total'] = time.time() - start_time
             Logger().ali_express_log( search_query, product_name_english, products_df_detailed, self.ai_manager, timings,
             )
         return {
             "image_bytes_io": image_bytes_io,
-            "products_list": transformed_products,
+            "products_list": products_list,
         }
 if __name__ == "__main__":
     response = MainProducts().process("מטען", True, True)

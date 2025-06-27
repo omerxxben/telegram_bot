@@ -58,3 +58,19 @@ class ProductsTransform:
             "price": product.get("target_sale_price"),
             "affiliate_link": product.get("promotion_link")
         }
+
+    def parse_to_list(self, products_df_detailed):
+        selected_columns = [
+            "target_sale_price",
+            "avg_evaluation_rating",
+            "sales_count",
+            "evaluation_count",
+            "subject",
+            "promotion_link",
+        ]
+        filtered_df = products_df_detailed[selected_columns].copy()
+        products_list = filtered_df.to_dict(orient="records")
+        transformed_products = [
+            ProductsTransform().transform_product_names(product) for product in products_list
+        ]
+        return transformed_products
