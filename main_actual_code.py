@@ -20,7 +20,9 @@ class MainProducts:
         if len(products_df) == 0:
             return [], "no image found"
         products_df_rank = getRank().sort_by_volume(products_df)
+
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
+
         if len(products_df_filtered_by_title) == 0:
             return [], "no image found"
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
@@ -36,6 +38,7 @@ class MainProducts:
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")
+
         if logs_flag:
             pretty_print_df(products_df_detailed)
             print("\n" + "=" * 50)
@@ -52,7 +55,7 @@ class MainProducts:
         return products_list, image_base_64
 
 if __name__ == "__main__":
-    products_list, image_base_64 = MainProducts().process("חפש לי מטען", True)
+    products_list, image_base_64 = MainProducts().process("חפש פתרון לעיניים יבשות", True)
     transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
     number_of_products = len(transformed_products)
     response = {
