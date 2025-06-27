@@ -167,13 +167,13 @@ class TelegramBotManager:
             print(f"⏱️ Message processing time (error): {processing_time:.3f} seconds")
 
     async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int):
-        """Send a page of products (up to 4 products)"""
+        """Send a page of products (up to 3 products)"""
         search_response = context.user_data.get('search_response', {})
         products_list = search_response.get('products_list', [])
 
         # Calculate products for this page
-        start_idx = page_index * 4
-        end_idx = min(start_idx + 4, len(products_list))
+        start_idx = page_index * 3
+        end_idx = min(start_idx + 3, len(products_list))
         page_products = products_list[start_idx:end_idx]
 
         if not page_products:
