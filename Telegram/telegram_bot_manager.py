@@ -36,7 +36,7 @@ class TelegramBotManager:
 
         # Error messages - centralized
         self.error_messages = {
-            'no_results': 'מצטערים, לא מצאנו תוצאות עבור \'{}\'.',
+            'no_results': 'מצטער, לא מצאתי תוצאות עבור \'{}\'. נסח את הבקשה בצורה שונה ואנסה למצוא את מה שאתה מחפש 😊',
             'no_activation': 'לחיפוש, יש להקליד \'חפש לי...\' ואת שם המוצר הרצוי ✨',
             'no_product_name': 'אנא ציין את שם המוצר שברצונך לחפש',
             'unauthorized_click': 'רק מי שביקש את חיפוש זה יכול לבקש עוד מוצרים 😊',
@@ -213,7 +213,7 @@ class TelegramBotManager:
             formatted_products.append(formatted_text)
 
         caption = '\n\n\n'.join(formatted_products)
-        caption += f'\n\n\n{self.template_config["bot_signature"]}'
+        caption += f'\n\n{self.template_config["bot_signature"]}'
 
         creator = ImageGridCreator(grid_size=(800, 800))
         page_products_pd = pd.DataFrame(page_products)
