@@ -43,7 +43,6 @@ class MainProducts:
             Logger().ali_express_log( search_query, product_name_english, products_df_detailed, self.ai_manager, timings,
             )
         return {
-            "image_bytes_io": image_bytes_io,
             "products_list": products_list,
         }
 if __name__ == "__main__":
