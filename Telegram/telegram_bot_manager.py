@@ -25,20 +25,20 @@ class TelegramBotManager:
             'price_line': '[אייקון_כסף] מחיר: [מחיר] ₪',
             'link_line': '[אייקון_קישור] [קישור_שותף]',
             'bot_signature': 'שמשון מותגים',
-            'search_more_button_text': 'חפש עוד תוצאות',
+            'search_more_button_text': 'עוד תוצאות 🔍',
             'activation_keywords': ['חפש לי', 'מצא לי'],
-            'search_in_process': '✨🔍 מחפש עבורך... אנא המתן'
+            'search_in_process': 'מחפש עבורך... אנא המתן 🔍'
         }
 
         # Error messages - centralized
         self.error_messages = {
             'no_results': 'מצטערים, לא מצאנו תוצאות עבור \'{}\'.',
-            'no_activation': 'לחיפוש, יש להקליד \'חפש לי...\' ואת שם המוצר הרצוי ✨🔍',
+            'no_activation': 'לחיפוש, יש להקליד \'חפש לי...\' ואת שם המוצר הרצוי ✨',
             'no_product_name': 'אנא ציין את שם המוצר שברצונך לחפש',
             'unauthorized_click': 'רק מי שביקש את חיפוש זה יכול לבקש עוד מוצרים 😊',
             'invalid_data': 'שגיאה: נתונים לא חוקיים',
             'search_expired': 'שגיאה: החיפוש פג תוקף. אנא בצע חיפוש חדש.',
-            'search_exhausted': '✅ כל המוצרים הזמינים עבור חיפוש זה כבר הוצגו'
+            'search_exhausted': 'כל המוצרים הזמינים עבור חיפוש זה כבר הוצגו ✅'
         }
 
     def _generate_medal_icons(self):
