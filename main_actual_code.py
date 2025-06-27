@@ -61,7 +61,7 @@ class MainProducts:
         return response
 
 if __name__ == "__main__":
-    response = MainProducts().process("חפש לי פתרון לעיניים יבשות", True, True)
+    response = MainProducts().process("חפש לי מטען", True, True)
     print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
