@@ -51,12 +51,8 @@ class AliExpressApiShortLink:
         except Exception as e:
             print(f"Error fetching short links: {e}")
             short_links = [None] * len(source_links)
-
         products_df_detailed['promotion_link'] = short_links
-
         total_time = time.time() - start_time
-        print(f"Total time for batch processing: {total_time}")
-
         return products_df_detailed, total_time
 
     def generate_signature(self, params: dict) -> str:

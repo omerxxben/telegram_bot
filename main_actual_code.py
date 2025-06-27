@@ -42,13 +42,13 @@ class MainProducts:
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")
+        transformed_products = [
+            ProductsTransform().transform_product_names(product) for product in products_list
+        ]
         if IS_LOGS:
             timings['total'] = time.time() - start_time
             Logger().ali_express_log( search_query, product_name_english, products_df_detailed, self.ai_manager, timings,
             )
-        transformed_products = [
-            ProductsTransform().transform_product_names(product) for product in products_list
-        ]
         return {
             "image_bytes_io": image_bytes_io,
             "products_list": transformed_products,
