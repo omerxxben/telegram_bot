@@ -1,5 +1,6 @@
 import logging
 import base64
+import time
 from typing import Dict, Any
 from io import BytesIO
 from PIL import Image, ImageDraw
@@ -87,6 +88,8 @@ class TelegramBotManager:
 
     async def handle_text_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle text messages and check for activation keywords"""
+        start_time = time.time()
+        
         message_text = update.message.text.strip()
 
         # Check for activation keywords
@@ -101,10 +104,16 @@ class TelegramBotManager:
 
         if not activation_found:
             await update.message.reply_text(self.error_messages['no_activation'])
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Message processing time (no activation): {processing_time:.3f} seconds")
             return
 
         if not product_name:
             await update.message.reply_text(self.error_messages['no_product_name'])
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Message processing time (no product name): {processing_time:.3f} seconds")
             return
 
         # Send "search in process" message
@@ -118,6 +127,9 @@ class TelegramBotManager:
                 # Delete search message before sending error
                 await search_message.delete()
                 await update.message.reply_text(self.error_messages['no_results'].format(product_name))
+                end_time = time.time()
+                processing_time = end_time - start_time
+                print(f"⏱️ Message processing time (no results): {processing_time:.3f} seconds")
                 return
 
             # Store search state
@@ -131,11 +143,18 @@ class TelegramBotManager:
 
             # Send first page
             await self.send_product_page(update, context, 0)
+            
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Message processing time (successful search): {processing_time:.3f} seconds")
 
         except Exception as e:
             # Delete search message before sending error
             await search_message.delete()
             await update.message.reply_text("שגיאה בביצוע החיפוש. אנא נסו שוב.")
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Message processing time (error): {processing_time:.3f} seconds")
 
     async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int):
         """Send a page of products (up to 4 products)"""
@@ -208,6 +227,8 @@ class TelegramBotManager:
 
     async def handle_callback_query(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle callback queries from inline keyboard buttons"""
+        start_time = time.time()
+        
         query = update.callback_query
         await query.answer()  # Acknowledge the callback
 
@@ -216,6 +237,9 @@ class TelegramBotManager:
             data_parts = query.data.split(':')
             if len(data_parts) != 3 or data_parts[0] != 'nav':
                 await query.answer(self.error_messages['invalid_data'], show_alert=True)
+                end_time = time.time()
+                processing_time = end_time - start_time
+                print(f"⏱️ Callback processing time (invalid data): {processing_time:.3f} seconds")
                 return
 
             target_page = int(data_parts[1])
@@ -224,20 +248,36 @@ class TelegramBotManager:
             # Check if current user is authorized
             if update.effective_user.id != original_user_id:
                 await query.answer(self.error_messages['unauthorized_click'], show_alert=True)
+                end_time = time.time()
+                processing_time = end_time - start_time
+                print(f"⏱️ Callback processing time (unauthorized): {processing_time:.3f} seconds")
                 return
 
             # Check if search state exists
             if 'search_response' not in context.user_data:
                 await query.message.reply_text(self.error_messages['search_expired'])
+                end_time = time.time()
+                processing_time = end_time - start_time
+                print(f"⏱️ Callback processing time (expired): {processing_time:.3f} seconds")
                 return
 
             # Send the requested page
             await self.send_product_page(update, context, target_page)
+            
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Callback processing time (successful): {processing_time:.3f} seconds")
 
         except (ValueError, IndexError) as e:
             await query.answer(self.error_messages['invalid_data'], show_alert=True)
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Callback processing time (value/index error): {processing_time:.3f} seconds")
         except Exception as e:
             await query.answer("שגיאה לא צפויה", show_alert=True)
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"⏱️ Callback processing time (unexpected error): {processing_time:.3f} seconds")
 
     def run(self):
         """Start the bot"""
