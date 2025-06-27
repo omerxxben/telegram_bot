@@ -1,12 +1,6 @@
-import json
 import time
-
-from PIL import Image
-from IPython.display import display
-
 from Classes.ale_express_api_short_link import AliExpressApiShortLink
 from Classes.ali_epress_api_products import AliExpressApiProducts
-from Classes.general_tools import pretty_print_df
 from Classes.ali_epress_api import AliExpressApi
 from Classes.get_rank import getRank
 from Classes.image_grid_creator import ImageGridCreator
