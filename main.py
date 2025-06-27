@@ -12,18 +12,7 @@ def get_cost():
         search_query = request.args.get("product_name")
         if not search_query:
             return jsonify({"error": "Missing required parameter: product_name"}), 400
-        products_list, image_base_64 =  MainProducts().process(search_query)
-        if not products_list:
-            return jsonify({
-            "message": "No products found",
-            "image": "No image found",
-            "products": [],
-            })
-        return jsonify({
-            "message": "Success",
-            "image": image_base_64,
-            "products": products_list,
-        })
+        response =  MainProducts().process(search_query)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

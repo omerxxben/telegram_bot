@@ -18,13 +18,13 @@ class MainProducts:
         products = AliExpressApi().process(product_name_english, 50)
         products_df = ProductsTransform().transform_to_table(products)
         if len(products_df) == 0:
-            return [], "no image found"
+            return []
         products_df_rank = getRank().sort_by_volume(products_df)
 
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
 
         if len(products_df_filtered_by_title) == 0:
-            return [], "no image found"
+            return []
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
         image_base_64 = creator.save_grid(products_df_detailed)
@@ -52,17 +52,18 @@ class MainProducts:
             total_cost = input_cost + output_cost
             print(f"Estimated cost: ${total_cost:.6f}")
             print("=" * 50)
-        return products_list, image_base_64
+        transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
+        number_of_products = len(transformed_products)
+        response = {
+            "number_of_products": number_of_products,
+            "image_base_64": image_base_64,
+            "products_list": transformed_products
+        }
+        return response
 
 if __name__ == "__main__":
-    products_list, image_base_64 = MainProducts().process("חפש פתרון לעיניים יבשות", True)
-    transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
-    number_of_products = len(transformed_products)
-    response = {
-        "number_of_products": number_of_products,
-        "image_base_64": image_base_64,
-        "products_list": transformed_products
-    }
+    response = MainProducts().process("חפש לי פתרון לעיניים יבשות", True)
+
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
 
