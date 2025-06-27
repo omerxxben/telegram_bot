@@ -285,11 +285,11 @@ class ImageGridCreator:
             return self.pil_image_to_base64_str(default_image)
         image_urls = df[image_column].dropna().head(4).tolist()
         grid_image = self.create_grid(image_urls)
-        return self.pil_image_to_base64_str(grid_image)
+        return self.pil_image_to_bytesio(grid_image)
 
-    def pil_image_to_base64_str(self, pil_img: Image.Image, format: str = "PNG") -> str:
+    def pil_image_to_bytesio(self, pil_img: Image.Image, format: str = "PNG") -> io.BytesIO:
         buffered = io.BytesIO()
+        buffered.name = f'image.{format.lower()}'
         pil_img.save(buffered, format=format)
-        img_bytes = buffered.getvalue()
-        img_b64 = base64.b64encode(img_bytes).decode('utf-8')
-        return img_b64
+        buffered.seek(0)
+        return buffered

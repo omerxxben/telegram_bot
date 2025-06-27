@@ -27,7 +27,7 @@ class MainProducts:
             return []
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
-        image_base_64 = creator.save_grid(products_df_detailed)
+        image_bytes_io = creator.save_grid(products_df_detailed)
         selected_columns = [
             "target_sale_price",
             "avg_evaluation_rating",
@@ -56,14 +56,14 @@ class MainProducts:
         number_of_products = len(transformed_products)
         response = {
             "number_of_products": number_of_products,
-            "image_base_64": image_base_64,
+            "image_bytes_io": image_bytes_io,
             "products_list": transformed_products
         }
         return response
 
 if __name__ == "__main__":
     response = MainProducts().process("חפש לי פתרון לעיניים יבשות", True)
-
+    print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
 
