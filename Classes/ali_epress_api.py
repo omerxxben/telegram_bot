@@ -34,6 +34,7 @@ class AliExpressApi:
             total_time = time.time() - start_time
             return response.json(), total_time
         except Exception as e:
+            print(f"error from get products {e}")
             total_time = time.time() - start_time
             return [], total_time
 

@@ -25,6 +25,7 @@ class MainProducts:
         products, timings['get_products'] = AliExpressApi().process(product_name_english, 50)
         products_df, timings['transform_table'] = ProductsTransform().transform_to_table(products)
         if products_df.empty:
+            print(products)
             print("Didn't find products")
             return []
         ranked_df = getRank().sort_by_volume(products_df)
