@@ -56,7 +56,8 @@ class ProductsTransform:
             "product_title": product.get("subject"),
             "sales_count": product.get("sales_count"),
             "price": product.get("target_sale_price"),
-            "affiliate_link": product.get("promotion_link")
+            "affiliate_link": product.get("promotion_link"),
+            "product_main_image_url": product.get("product_main_image_url")
         }
 
     def parse_to_list(self, products_df_detailed):
@@ -67,6 +68,7 @@ class ProductsTransform:
             "evaluation_count",
             "subject",
             "promotion_link",
+            "product_main_image_url",
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")

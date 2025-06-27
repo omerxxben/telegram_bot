@@ -1,9 +1,13 @@
 import time
 from typing import Dict, Any
 from io import BytesIO
+
+import pandas as pd
 from PIL import Image, ImageDraw
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+
+from Classes.image_grid_creator import ImageGridCreator
 from main_actual_code import MainProducts
 
 class TelegramBotManager:
@@ -211,7 +215,13 @@ class TelegramBotManager:
         caption += f'\n\n{self.template_config["bot_signature"]}'
 
         # Get image and ensure it's properly formatted
-        image_bytes_io = search_response.get('image_bytes_io', None)
+        if page_index == 0:
+            image_bytes_io = search_response.get('image_bytes_io', None)
+        else:
+            creator = ImageGridCreator(grid_size=(800, 800))
+            page_products_pd = pd.DataFrame(page_products)
+            image_bytes_io, coshi = creator.save_grid(page_products_pd)
+
         if not image_bytes_io:
             image_bytes_io = self._create_fallback_image()
         
