@@ -1,4 +1,6 @@
 import json
+import time
+
 from PIL import Image
 from IPython.display import display
 
@@ -13,19 +15,23 @@ from Classes.ai_manager import AIManager
 
 
 class MainProducts:
-    def process(self, search_query, IS_LOGS = False, IS_PRINT_IMAGE = False):
+    def process(self, search_query, IS_LOGS = True, IS_PRINT_IMAGE = False):
+        start_time = time.time()
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
         product_name_english = ai_manager.translate_hebrew_query(search_query)
         if product_name_english == "":
+            print("no product name")
             return []
         products = AliExpressApi().process(product_name_english, 50)
         products_df = ProductsTransform().transform_to_table(products)
         if len(products_df) == 0:
+            print("didnt find products")
             return []
         products_df_rank = getRank().sort_by_volume(products_df)
         products_df_filtered_by_title = ai_manager.get_suitable_titles(product_name_english, products_df_rank)
         if len(products_df_filtered_by_title) == 0:
+            print("didnt find match products via ai")
             return []
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
@@ -47,7 +53,8 @@ class MainProducts:
             print("=" * 50)
             print(f"Input tokens: {ai_manager.total_tokens_used['prompt_tokens']}")
             print(f"Output tokens: {ai_manager.total_tokens_used['completion_tokens']}")
-            print(f"Total runtime: {ai_manager.total_runtime:.3f}s")
+            print(f"Total runtime of ai: {ai_manager.total_runtime:.3f}s")
+            print(f"Total runtime: {time.time() - start_time:.3f}s")
             input_cost = ai_manager.total_tokens_used['prompt_tokens'] * 0.0001 / 1000
             output_cost = ai_manager.total_tokens_used['completion_tokens'] * 0.0004 / 1000
             total_cost = input_cost + output_cost
