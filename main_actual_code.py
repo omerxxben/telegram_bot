@@ -52,7 +52,7 @@ class MainProducts:
         return products_list, image_base_64
 
 if __name__ == "__main__":
-    products_list, image_base_64 = MainProducts().process("חפש לי מצלמה", True)
+    products_list, image_base_64 = MainProducts().process("חפש לי מטען", True)
     transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
     number_of_products = len(transformed_products)
     response = {
