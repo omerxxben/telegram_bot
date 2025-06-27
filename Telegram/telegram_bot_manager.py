@@ -1,5 +1,3 @@
-import logging
-import base64
 import time
 from typing import Dict, Any
 from io import BytesIO
@@ -178,8 +176,15 @@ class TelegramBotManager:
         caption = '\n\n'.join(formatted_products)
         caption += f'\n\n{self.template_config["bot_signature"]}'
 
-        # Get base64 image and convert to BytesIO
-        image_bytes = search_response.get('image_bytes_io', '')
+        # Get image and ensure it's properly formatted
+        image_bytes_io = search_response.get('image_bytes_io', None)
+        if not image_bytes_io:
+            image_bytes_io = self._create_fallback_image()
+        
+        # Ensure we're at the beginning of the BytesIO stream
+        if hasattr(image_bytes_io, 'seek'):
+            image_bytes_io.seek(0)
+
         # Create keyboard if there are more results
         keyboard = []
         if end_idx < len(products_list):
@@ -199,14 +204,14 @@ class TelegramBotManager:
         if hasattr(update, 'callback_query') and update.callback_query:
             # This is a callback query response
             await update.callback_query.message.reply_photo(
-                photo=image_bytes,
+                photo=image_bytes_io,
                 caption=caption,
                 reply_markup=reply_markup
             )
         else:
             # This is a regular message response
             await update.message.reply_photo(
-                photo=image_bytes,
+                photo=image_bytes_io,
                 caption=caption,
                 reply_markup=reply_markup
             )
@@ -230,11 +235,11 @@ class TelegramBotManager:
         start_time = time.time()
         
         query = update.callback_query
-        await query.answer()  # Acknowledge the callback
 
         try:
             # Parse callback data
             data_parts = query.data.split(':')
+            
             if len(data_parts) != 3 or data_parts[0] != 'nav':
                 await query.answer(self.error_messages['invalid_data'], show_alert=True)
                 end_time = time.time()
@@ -260,6 +265,8 @@ class TelegramBotManager:
                 processing_time = end_time - start_time
                 print(f"⏱️ Callback processing time (expired): {processing_time:.3f} seconds")
                 return
+
+            products_list = context.user_data['search_response'].get('products_list', [])
 
             # Send the requested page
             await self.send_product_page(update, context, target_page)
