@@ -16,16 +16,16 @@ class AliExpressApiProducts:
         self._rate_limit_lock = threading.Lock()
         self._last_request_time = 0
 
-    def process(self, products_df: pd.DataFrame) -> pd.DataFrame:
+    def process(self, products_df: pd.DataFrame):
+        start_time = time.time()
         if products_df.empty:
-            return pd.DataFrame()
+            return pd.DataFrame(), 0
         products_df = products_df.copy()
         # Add the new 'subject' column
         products_df['avg_evaluation_rating'] = None
         products_df['sales_count'] = None
         products_df['evaluation_count'] = None
         products_df['subject'] = None  # <-- ADDED
-
         tasks = [(index, str(row['product_id'])) for index, row in products_df.iterrows()]
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             future_to_task = {
@@ -49,8 +49,8 @@ class AliExpressApiProducts:
                     completed += 1
                 except Exception as e:
                     print(f"  ✗ Error processing product {product_id}: {e}")
-
-        return products_df
+        total_time = time.time() - start_time
+        return products_df, total_time
 
     # Update the return type hint to include string for the subject
     def _process_single_product(self, index: int, product_id: str) -> Tuple[float, str, str, str] or None: # <-- MODIFIED

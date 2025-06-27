@@ -8,6 +8,7 @@ from Classes.GLOBAL_CONST import *
 
 class AliExpressApi:
     def process(self, product_name, number_of_rows):
+        start_time = time.time()
         number_of_rows = number_of_rows + 1
         timestamp = int(time.time() * 1000)
         params = {
@@ -26,12 +27,14 @@ class AliExpressApi:
             "sort": "LAST_VOLUME_DESC"
         }
         params["sign"] = self.generate_signature(params)
+        total_time = time.time() - start_time
+
         try:
             response = requests.get(URL, params=params)
             response.raise_for_status()
-            return response.json()
+            return response.json(), total_time
         except Exception as e:
-            return {"error": str(e)}
+            return [], total_time
 
     def generate_signature(self, params: dict) -> str:
         sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))

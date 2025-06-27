@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 from typing import Dict, List, Any, Optional
 
@@ -21,14 +23,15 @@ class ProductsTransform:
             'promotion_link',
         ]
 
-    def transform_to_table(self, products: Dict[str, Any]) -> pd.DataFrame:
+    def transform_to_table(self, products: Dict[str, Any]):
+        start_time = time.time()
         try:
             products_data = products.get(
                 'aliexpress_affiliate_hotproduct_query_response', {}
             ).get('resp_result', {}).get('result', {}).get('products', {}).get('product', [])
 
             if not products_data:
-                return pd.DataFrame(columns=self.columns)
+                return pd.DataFrame(columns=self.columns), 0
 
             # Extract specified columns from each product
             transformed_data = []
@@ -38,12 +41,13 @@ class ProductsTransform:
                     row[column] = product.get(column, '')
                 transformed_data.append(row)
             print(f"pulled this number of rows from hotproducts api: {len(transformed_data)}")
-
-            return pd.DataFrame(transformed_data)
+            total_time =  time.time() - start_time
+            return pd.DataFrame(transformed_data), total_time
 
         except Exception as e:
+            total_time =  time.time() - start_time
             print(f"Error transforming data: {e}")
-            return pd.DataFrame(columns=self.columns)
+            return pd.DataFrame(columns=self.columns), total_time
 
     def transform_product_names(self, product):
         return {

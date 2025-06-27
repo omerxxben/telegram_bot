@@ -1,4 +1,5 @@
 import base64
+import time
 
 import pandas as pd
 import requests
@@ -409,6 +410,8 @@ class ImageGridCreator:
         return final_grid
 
     def save_grid(self, df: pd.DataFrame, IS_PRINT_IMAGE=False):
+        start_time = time.time()
+
         image_column: str = "product_main_image_url"
         if df.empty:
             default_url = "https://cloudinary-marketing-res.cloudinary.com/images/w_1000,c_scale/v1679921049/Image_URL_header/Image_URL_header-png?_i=AA"
@@ -420,7 +423,8 @@ class ImageGridCreator:
         if IS_PRINT_IMAGE:
             image = Image.open(image_bytes_io)
             image.show()
-        return image_bytes_io
+        total_time = time.time() - start_time
+        return image_bytes_io, total_time
 
     def pil_image_to_bytesio(self, pil_img: Image.Image, format: str = "PNG") -> io.BytesIO:
         buffered = io.BytesIO()

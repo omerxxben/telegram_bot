@@ -10,7 +10,9 @@ from Classes.general_tools import pretty_print_df
 
 
 class AliExpressApiShortLink:
-    def process(self, products_df_detailed: pd.DataFrame) -> pd.DataFrame:
+    def process(self, products_df_detailed: pd.DataFrame):
+        start_time = time.time()
+
         short_links = []
 
         for index, row in products_df_detailed.iterrows():
@@ -48,7 +50,9 @@ class AliExpressApiShortLink:
                 short_link = None
             short_links.append(short_link)
         products_df_detailed['promotion_link'] = short_links
-        return products_df_detailed
+        total_time = time.time() - start_time
+
+        return products_df_detailed, total_time
 
     def generate_signature(self, params: dict) -> str:
         sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))
