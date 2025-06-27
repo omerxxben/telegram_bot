@@ -37,7 +37,8 @@ class TelegramBotManager:
             'no_product_name': 'אנא ציין את שם המוצר שברצונך לחפש',
             'unauthorized_click': 'רק מי שביקש את חיפוש זה יכול לבקש עוד מוצרים 😊',
             'invalid_data': 'שגיאה: נתונים לא חוקיים',
-            'search_expired': 'שגיאה: החיפוש פג תוקף. אנא בצע חיפוש חדש.'
+            'search_expired': 'שגיאה: החיפוש פג תוקף. אנא בצע חיפוש חדש.',
+            'search_exhausted': '✅ כל המוצרים הזמינים עבור חיפוש זה כבר הוצגו'
         }
 
     def _generate_medal_icons(self):
@@ -142,17 +143,32 @@ class TelegramBotManager:
                 print(f"⏱️ Message processing time (no results): {processing_time:.3f} seconds")
                 return
 
-            # Store search state
-            context.user_data['search_response'] = search_response
-            context.user_data['current_page'] = 0
-            context.user_data['original_query'] = product_name
-            context.user_data['user_id'] = update.effective_user.id
+            # Create unique search ID using timestamp
+            search_id = str(int(time.time() * 1000))  # Milliseconds for uniqueness
+            
+            # Initialize searches dict if it doesn't exist
+            if 'searches' not in context.user_data:
+                context.user_data['searches'] = {}
+            
+            # Store search state with unique ID
+            context.user_data['searches'][search_id] = {
+                'search_response': search_response,
+                'original_query': product_name,
+                'user_id': update.effective_user.id,
+                'timestamp': time.time()
+            }
+            
+            # Clean up old searches (keep only last 10)
+            if len(context.user_data['searches']) > 10:
+                oldest_keys = sorted(context.user_data['searches'].keys())[:-10]
+                for old_key in oldest_keys:
+                    del context.user_data['searches'][old_key]
 
             # Delete search message before sending results
             await search_message.delete()
 
             # Send first page
-            await self.send_product_page(update, context, 0)
+            await self.send_product_page(update, context, 0, search_id)
             
             end_time = time.time()
             processing_time = end_time - start_time
@@ -166,9 +182,14 @@ class TelegramBotManager:
             processing_time = end_time - start_time
             print(f"⏱️ Message processing time (error): {processing_time:.3f} seconds")
 
-    async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int):
+    async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int, search_id: str):
         """Send a page of products (up to 3 products)"""
-        search_response = context.user_data.get('search_response', {})
+        # Get search data by ID
+        search_data = context.user_data.get('searches', {}).get(search_id)
+        if not search_data:
+            return
+            
+        search_response = search_data['search_response']
         products_list = search_response.get('products_list', [])
 
         # Calculate products for this page
@@ -202,14 +223,17 @@ class TelegramBotManager:
         keyboard = []
         if end_idx < len(products_list):
             next_page = page_index + 1
-            user_id = context.user_data.get('user_id', update.effective_user.id)
-            callback_data = f"nav:{next_page}:{user_id}"
+            user_id = search_data['user_id']
+            callback_data = f"nav:{next_page}:{user_id}:{search_id}"
 
             button = InlineKeyboardButton(
                 self.template_config['search_more_button_text'],
                 callback_data=callback_data
             )
             keyboard.append([button])
+        else:
+            # Mark search as exhausted when we reach the last page
+            context.user_data['searches'][search_id]['exhausted'] = True
 
         reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
@@ -228,9 +252,6 @@ class TelegramBotManager:
                 caption=caption,
                 reply_markup=reply_markup
             )
-
-        # Update current page
-        context.user_data['current_page'] = page_index
 
     def _create_fallback_image(self) -> BytesIO:
         """Create a fallback image when base64 image is not available"""
@@ -253,7 +274,7 @@ class TelegramBotManager:
             # Parse callback data
             data_parts = query.data.split(':')
             
-            if len(data_parts) != 3 or data_parts[0] != 'nav':
+            if len(data_parts) != 4 or data_parts[0] != 'nav':
                 await query.answer(self.error_messages['invalid_data'], show_alert=True)
                 end_time = time.time()
                 processing_time = end_time - start_time
@@ -262,6 +283,7 @@ class TelegramBotManager:
 
             target_page = int(data_parts[1])
             original_user_id = int(data_parts[2])
+            search_id = data_parts[3]
 
             # Check if current user is authorized
             if update.effective_user.id != original_user_id:
@@ -272,17 +294,26 @@ class TelegramBotManager:
                 return
 
             # Check if search state exists
-            if 'search_response' not in context.user_data:
-                await query.message.reply_text(self.error_messages['search_expired'])
+            search_data = context.user_data.get('searches', {}).get(search_id)
+            if not search_data:
+                await query.answer(self.error_messages['search_expired'], show_alert=True)
                 end_time = time.time()
                 processing_time = end_time - start_time
                 print(f"⏱️ Callback processing time (expired): {processing_time:.3f} seconds")
                 return
 
-            products_list = context.user_data['search_response'].get('products_list', [])
+            # Check if search is exhausted (all products already shown)
+            if search_data.get('exhausted', False):
+                await query.answer(self.error_messages['search_exhausted'], show_alert=True)
+                end_time = time.time()
+                processing_time = end_time - start_time
+                print(f"⏱️ Callback processing time (exhausted): {processing_time:.3f} seconds")
+                return
+
+            products_list = search_data['search_response'].get('products_list', [])
 
             # Send the requested page
-            await self.send_product_page(update, context, target_page)
+            await self.send_product_page(update, context, target_page, search_id)
             
             end_time = time.time()
             processing_time = end_time - start_time
