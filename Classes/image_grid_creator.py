@@ -411,13 +411,8 @@ class ImageGridCreator:
 
     def save_grid(self, df: pd.DataFrame, IS_PRINT_IMAGE=False):
         start_time = time.time()
-
         image_column: str = "product_main_image_url"
-        if df.empty:
-            default_url = "https://cloudinary-marketing-res.cloudinary.com/images/w_1000,c_scale/v1679921049/Image_URL_header/Image_URL_header-png?_i=AA"
-            default_image = self.download_image(default_url)
-            return self.pil_image_to_base64_str(default_image)
-        image_urls = df[image_column].dropna().head(4).tolist()
+        image_urls = df[image_column].dropna().head(3).tolist()
         grid_image = self.create_grid(image_urls)
         image_bytes_io = self.pil_image_to_bytesio(grid_image)
         if IS_PRINT_IMAGE:
