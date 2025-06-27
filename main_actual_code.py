@@ -35,7 +35,7 @@ class MainProducts:
             return []
         products_df_detailed, timings['get_details'] = AliExpressApiProducts().process(filtered_df)
         products_df_detailed, timings['get_short_link'] = AliExpressApiShortLink().process(products_df_detailed)
-        image_bytes_io, timings['get_image'] = self.creator.save_grid(products_df_detailed, IS_PRINT_IMAGE)
+        #image_bytes_io, timings['get_image'] = self.creator.save_grid(products_df_detailed, IS_PRINT_IMAGE)
         products_list = ProductsTransform().parse_to_list(products_df_detailed)
 
         if IS_LOGS:

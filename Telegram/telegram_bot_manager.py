@@ -159,7 +159,8 @@ class TelegramBotManager:
                 'search_response': search_response,
                 'original_query': product_name,
                 'user_id': update.effective_user.id,
-                'timestamp': time.time()
+                'timestamp': time.time(),
+                'original_message_id': update.message.message_id
             }
             
             # Clean up old searches (keep only last 10)
@@ -243,21 +244,18 @@ class TelegramBotManager:
 
         reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
-        # Send photo with caption
-        if hasattr(update, 'callback_query') and update.callback_query:
-            # This is a callback query response
-            await update.callback_query.message.reply_photo(
-                photo=image_bytes_io,
-                caption=caption,
-                reply_markup=reply_markup
-            )
-        else:
-            # This is a regular message response
-            await update.message.reply_photo(
-                photo=image_bytes_io,
-                caption=caption,
-                reply_markup=reply_markup
-            )
+        # Get the chat and original message ID for consistent reply threading
+        chat_id = update.effective_chat.id
+        original_message_id = search_data['original_message_id']
+
+        # Send photo with caption - always reply to original message
+        await context.bot.send_photo(
+            chat_id=chat_id,
+            photo=image_bytes_io,
+            caption=caption,
+            reply_markup=reply_markup,
+            reply_to_message_id=original_message_id
+        )
 
     def _create_fallback_image(self) -> BytesIO:
         """Create a fallback image when base64 image is not available"""

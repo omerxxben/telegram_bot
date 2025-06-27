@@ -15,7 +15,7 @@ class Logger:
         print(f"Total runtime of get products: {timings['get_products']:.3f}s")
         print(f"Total runtime of transform to table: {timings['transform_table']:.3f}s")
         print(f"Total runtime of get details: {timings['get_details']:.3f}s")
-        print(f"Total runtime of get image: {timings['get_image']:.3f}s")
+        #print(f"Total runtime of get image: {timings['get_image']:.3f}s")
         print(f"Total runtime of get short link: {timings['get_short_link']:.3f}s")
         print(f"Total runtime: {timings['total']:.3f}s")
         input_cost = ai_manager.total_tokens_used['prompt_tokens'] * 0.0001 / 1000
