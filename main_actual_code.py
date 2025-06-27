@@ -17,6 +17,8 @@ class MainProducts:
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
         product_name_english = ai_manager.translate_hebrew_query(search_query)
+        if product_name_english == "":
+            return []
         products = AliExpressApi().process(product_name_english, 50)
         products_df = ProductsTransform().transform_to_table(products)
         if len(products_df) == 0:
@@ -52,9 +54,7 @@ class MainProducts:
             print(f"Estimated cost: ${total_cost:.6f}")
             print("=" * 50)
         transformed_products = [ProductsTransform().transform_product_names(product) for product in products_list]
-        number_of_products = len(transformed_products)
         response = {
-            "number_of_products": number_of_products,
             "image_bytes_io": image_bytes_io,
             "products_list": transformed_products
         }

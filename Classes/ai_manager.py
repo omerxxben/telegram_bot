@@ -82,14 +82,7 @@ class AIManager:
 
     # ================================ Public methods ================================
     
-    def translate_hebrew_query(self, hebrew_query: str) -> str:
-        # Check if query starts with "חפש לי"
-        if not hebrew_query.strip().startswith("חפש לי"):
-            return ""
-        
-        # Extract the product name (remove "חפש לי" prefix)
-        product_text = hebrew_query.strip()[6:].strip()  # 6 characters for "חפש לי "
-        
+    def translate_hebrew_query(self, product_text: str) -> str:
         if not product_text:
             return ""
         
