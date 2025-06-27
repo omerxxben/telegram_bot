@@ -1,4 +1,6 @@
 import json
+from PIL import Image
+from IPython.display import display
 
 from Classes.ale_express_api_short_link import AliExpressApiShortLink
 from Classes.ali_epress_api_products import AliExpressApiProducts
@@ -11,7 +13,7 @@ from Classes.ai_manager import AIManager
 
 
 class MainProducts:
-    def process(self, search_query, logs_flag = False):
+    def process(self, search_query, IS_LOGS = False, IS_PRINT_IMAGE = False):
         creator = ImageGridCreator(grid_size=(800, 800))
         ai_manager = AIManager()
         product_name_english = ai_manager.translate_hebrew_query(search_query)
@@ -25,7 +27,7 @@ class MainProducts:
             return []
         products_df_detailed = AliExpressApiProducts().process(products_df_filtered_by_title)
         products_df_detailed = AliExpressApiShortLink().process(products_df_detailed)
-        image_bytes_io = creator.save_grid(products_df_detailed)
+        image_bytes_io = creator.save_grid(products_df_detailed, IS_PRINT_IMAGE)
         selected_columns = [
             "target_sale_price",
             "avg_evaluation_rating",
@@ -36,7 +38,7 @@ class MainProducts:
         ]
         filtered_df = products_df_detailed[selected_columns].copy()
         products_list = filtered_df.to_dict(orient="records")
-        if logs_flag:
+        if IS_LOGS:
             pretty_print_df(products_df_detailed)
             print("\n" + "=" * 50)
             print("AI USAGE STATISTICS")
@@ -59,7 +61,7 @@ class MainProducts:
         return response
 
 if __name__ == "__main__":
-    response = MainProducts().process("חפש לי פתרון לעיניים יבשות", True)
+    response = MainProducts().process("חפש לי פתרון לעיניים יבשות", True, True)
     print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
