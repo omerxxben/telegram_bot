@@ -10,48 +10,62 @@ from Classes.general_tools import pretty_print_df
 
 
 class AliExpressApiShortLink:
-    def process(self, products_df_detailed: pd.DataFrame):
+    def process(self, products_df_detailed: pd.DataFrame) -> (pd.DataFrame, float):
         start_time = time.time()
-        source_links = products_df_detailed['promotion_link'].tolist()
-        source_values = ','.join(source_links)
+        if 'promotion_link' not in products_df_detailed.columns or products_df_detailed['promotion_link'].empty:
+            print("Warning: 'promotion_link' column is missing or empty. Skipping processing.")
+            return products_df_detailed, 0.0
+        unique_source_links = list(dict.fromkeys(products_df_detailed['promotion_link'].dropna().tolist()))
+        if not unique_source_links:
+            print("No valid source links to process.")
+            return products_df_detailed, 0.0
+        source_values = ','.join(unique_source_links)
         timestamp = int(time.time() * 1000)
         params = {
             "app_key": APP_KEY,
-            "timestamp": timestamp,
+            "timestamp": str(timestamp),
             "method": "aliexpress.affiliate.link.generate",
             "sign_method": "md5",
             "format": "json",
-            "promotion_link_type": 2,
+            "promotion_link_type": "2",  # Should be string based on API docs
             "source_values": source_values,
             "tracking_id": "default",
         }
         params["sign"] = self.generate_signature(params)
+
+        link_map = {}
         try:
             response = requests.post(URL, data=params)
             response.raise_for_status()
             data = response.json()
-            promo_links = (
+            promo_links_data = (
                 data.get("aliexpress_affiliate_link_generate_response", {})
                 .get("resp_result", {})
                 .get("result", {})
                 .get("promotion_links", {})
                 .get("promotion_link", [])
             )
-            if promo_links and isinstance(promo_links, list):
-                short_links = [link.get("promotion_link") for link in promo_links]
 
-                if len(short_links) != len(source_links):
-                    print(f"Warning: Expected {len(source_links)} links, got {len(short_links)}")
-                    short_links.extend([None] * (len(source_links) - len(short_links)))
-                    short_links = short_links[:len(source_links)]
+            if promo_links_data and isinstance(promo_links_data, list):
+                link_map = {
+                    link.get("source_value"): link.get("promotion_link")
+                    for link in promo_links_data
+                    if link.get("source_value") and link.get("promotion_link")
+                }
+                print(f"Successfully generated {len(link_map)} affiliate links.")
             else:
-                print("No promotion links found in response")
-                short_links = [None] * len(source_links)
+                error_message = data.get("error_response", {}).get("msg", "No promotion links found.")
+                print(f"API call did not return promotion links. Reason: {error_message}")
 
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching short links from API: {e}")
         except Exception as e:
-            print(f"Error fetching short links: {e}")
-            short_links = [None] * len(source_links)
-        products_df_detailed['promotion_link'] = short_links
+            print(f"An unexpected error occurred during API processing: {e}")
+        if link_map:
+            original_links = products_df_detailed['promotion_link']
+            products_df_detailed['promotion_link'] = original_links.map(link_map).fillna(original_links)
+
         total_time = time.time() - start_time
         return products_df_detailed, total_time
 
