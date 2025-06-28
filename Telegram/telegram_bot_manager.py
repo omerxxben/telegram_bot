@@ -219,7 +219,7 @@ class TelegramBotManager:
 
         creator = ImageGridCreator(grid_size=(800, 800))
         page_products_pd = pd.DataFrame(page_products)
-        image_bytes_io, coshi = creator.save_grid(page_products_pd)
+        image_bytes_io, coshi = creator.save_grid(page_products_pd, page_index)
 
         if not image_bytes_io:
             image_bytes_io = self._create_fallback_image()
