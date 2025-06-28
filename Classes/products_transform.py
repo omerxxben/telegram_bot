@@ -3,6 +3,8 @@ import time
 import pandas as pd
 from typing import Dict, List, Any, Optional
 
+from Classes.GLOBAL_CONST import get_products_api
+
 
 class ProductsTransform:
     def __init__(self):
@@ -25,9 +27,10 @@ class ProductsTransform:
 
     def transform_to_table(self, products: Dict[str, Any]):
         start_time = time.time()
+        new_get_products_api = get_products_api.replace('.', '_')
         try:
             products_data = products.get(
-                'aliexpress_affiliate_hotproduct_query_response', {}
+                f"{new_get_products_api}_response", {}
             ).get('resp_result', {}).get('result', {}).get('products', {}).get('product', [])
 
             if not products_data:

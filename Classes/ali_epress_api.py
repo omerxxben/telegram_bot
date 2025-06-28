@@ -15,7 +15,7 @@ class AliExpressApi:
             "keywords": product_name,
             "app_key": APP_KEY,
             "timestamp": timestamp,
-            "method": "aliexpress.affiliate.hotproduct.query",
+            "method": get_products_api,
             "sign_method": "md5",
             "format": "json",
             "page_no": 1,
