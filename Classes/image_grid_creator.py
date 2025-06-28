@@ -35,47 +35,14 @@ class ImageGridCreator:
         }
 
     def create_modern_background(self, size: Tuple[int, int]) -> Image.Image:
-        """
-        Create a modern gradient background with subtle pattern
-
-        Args:
-            size: Size of the background image
-
-        Returns:
-            PIL Image with modern background
-        """
-        width, height = size
-        background = Image.new('RGB', size, self.colors['primary'])
-
-        # Create gradient overlay
-        gradient = Image.new('RGB', size, self.colors['gradient_start'])
-        gradient_draw = ImageDraw.Draw(gradient)
-
-        # Create diagonal gradient
-        for i in range(width):
-            # Calculate gradient position (0 to 1)
-            pos = i / width
-            # Interpolate between gradient colors
-            r1, g1, b1 = tuple(int(self.colors['gradient_start'][i:i + 2], 16) for i in (1, 3, 5))
-            r2, g2, b2 = tuple(int(self.colors['gradient_end'][i:i + 2], 16) for i in (1, 3, 5))
-
-            r = int(r1 + (r2 - r1) * pos)
-            g = int(g1 + (g2 - g1) * pos)
-            b = int(b1 + (b2 - b1) * pos)
-
-            gradient_draw.line([(i, 0), (i, height)], fill=(r, g, b))
-
-        # Blend gradient with background
-        background = Image.blend(background, gradient, 0.7)
-
-        # Add subtle geometric pattern
-        pattern_draw = ImageDraw.Draw(background)
-
-        # Add diagonal lines pattern
-        for i in range(0, width + height, 40):
-            pattern_draw.line([(i, 0), (i - height, height)], fill=self.colors['secondary'], width=1)
-
-        return background
+        try:
+            background = Image.open("Classes/background.png").convert("RGB")
+            background = background.resize(size, Image.Resampling.LANCZOS)
+            return background
+        except Exception as e:
+            print(f"Error loading custom background image: {e}")
+            fallback = Image.new('RGB', size, self.colors['primary'])
+            return fallback
 
     def create_image_frame(self, image: Image.Image, frame_size: Tuple[int, int],
                            corner_radius: int = 15, shadow_offset: int = 8) -> Image.Image:
