@@ -26,10 +26,9 @@ class TelegramBotManager:
             'link_icon': '🔗',
             'title_line': '[אייקון_מדליה] [שם_מוצר]',
             'sales_line': '[אייקון_עגלה] [כמות_מכירות] רכישות',
-            'rating_line': '[אייקון_כוכב] [דירוג] מ-[כמות_ביקורות] ביקורות',
+            'rating_line': '[אייקון_כוכב] [דירוג] ([כמות_ביקורות] ביקורות)',
             'price_line': '[אייקון_כסף] מחיר: [מחיר] ₪',
             'link_line': '[אייקון_קישור] [קישור_שותף]',
-            'bot_signature': 'שמשון מותגים',
             'search_more_button_text': 'עוד תוצאות 🔍',
             'activation_keywords': ['חפש לי', 'מצא לי'],
             'search_in_process': 'מחפש עבורך... אנא המתן 🔍'
@@ -86,15 +85,18 @@ class TelegramBotManager:
         # Replace placeholders in sales line
         sales_line = sales_line.replace('[אייקון_עגלה]', self.template_config['cart_icon'])
         sales_line = sales_line.replace('[כמות_מכירות]', str(product['sales_count']))
+        sales_line = f"<b>{sales_line}</b>"  # HTML Bold formatting
 
         # Replace placeholders in rating line
         rating_line = rating_line.replace('[אייקון_כוכב]', self.template_config['star_icon'])
         rating_line = rating_line.replace('[דירוג]', str(product['rating']))
         rating_line = rating_line.replace('[כמות_ביקורות]', str(product['reviews_count']))
+        rating_line = f"<b>{rating_line}</b>"  # HTML Bold formatting
 
         # Replace placeholders in price line
         price_line = price_line.replace('[אייקון_כסף]', self.template_config['money_bag_icon'])
         price_line = price_line.replace('[מחיר]', str(product['price']))
+        price_line = f"<b>{price_line}</b>"  # HTML Bold formatting
 
         # Replace placeholders in link line
         link_line = link_line.replace('[אייקון_קישור]', self.template_config['link_icon'])
@@ -222,7 +224,6 @@ class TelegramBotManager:
             formatted_products.append(formatted_text)
 
         caption = '\n\n\n'.join(formatted_products)
-        caption += f'\n\n{self.template_config["bot_signature"]}'
 
         creator = ImageGridCreator(grid_size=(800, 800))
         page_products_pd = pd.DataFrame(page_products)
@@ -263,7 +264,8 @@ class TelegramBotManager:
             photo=image_bytes_io,
             caption=caption,
             reply_markup=reply_markup,
-            reply_to_message_id=original_message_id
+            reply_to_message_id=original_message_id,
+            parse_mode='HTML'
         )
 
     def _create_fallback_image(self) -> BytesIO:
