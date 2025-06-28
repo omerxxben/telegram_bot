@@ -2,6 +2,7 @@ import time
 from Classes.ale_express_api_short_link import AliExpressApiShortLink
 from Classes.ali_epress_api_products import AliExpressApiProducts
 from Classes.ali_epress_api import AliExpressApi
+from Classes.general_tools import pretty_print_df
 from Classes.get_rank import getRank
 from Classes.image_grid_creator import ImageGridCreator
 from Classes.logger import Logger
@@ -24,6 +25,8 @@ class MainProducts:
             return []
         products, timings['get_products'] = AliExpressApi().process(product_name_english, 50)
         products_df, timings['transform_table'] = ProductsTransform().transform_to_table(products)
+        pretty_print_df(products_df)
+
         if products_df.empty:
             print(products)
             print("Didn't find products")

@@ -10,6 +10,7 @@ from telegram.ext import Application, MessageHandler, CallbackQueryHandler, Cont
 from Classes.image_grid_creator import ImageGridCreator
 from main_actual_code import MainProducts
 
+
 class TelegramBotManager:
     def __init__(self, bot_token: str):
         self.bot_token = bot_token
@@ -48,13 +49,13 @@ class TelegramBotManager:
     def _generate_medal_icons(self):
         """Generate medal icons for positions 0-49"""
         icons = ['🥇', '🥈', '🥉']  # First 3 positions get medals
-        
+
         # For positions 4-49, create number emojis
         for i in range(4, 50):
             number_str = str(i)
             emoji_number = ''.join([f'{digit}️⃣' for digit in number_str])
             icons.append(emoji_number)
-        
+
         return icons
 
     def _setup_handlers(self):
@@ -104,7 +105,7 @@ class TelegramBotManager:
     async def handle_text_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle text messages and check for activation keywords"""
         start_time = time.time()
-        
+
         message_text = update.message.text.strip()
 
         # Check for activation keywords
@@ -149,11 +150,11 @@ class TelegramBotManager:
 
             # Create unique search ID using timestamp
             search_id = str(int(time.time() * 1000))  # Milliseconds for uniqueness
-            
+
             # Initialize searches dict if it doesn't exist
             if 'searches' not in context.user_data:
                 context.user_data['searches'] = {}
-            
+
             # Store search state with unique ID
             context.user_data['searches'][search_id] = {
                 'search_response': search_response,
@@ -162,7 +163,7 @@ class TelegramBotManager:
                 'timestamp': time.time(),
                 'original_message_id': update.message.message_id
             }
-            
+
             # Clean up old searches (keep only last 10)
             if len(context.user_data['searches']) > 10:
                 oldest_keys = sorted(context.user_data['searches'].keys())[:-10]
@@ -174,7 +175,7 @@ class TelegramBotManager:
 
             # Send first page
             await self.send_product_page(update, context, 0, search_id)
-            
+
             end_time = time.time()
             processing_time = end_time - start_time
             print(f"⏱️ Message processing time (successful search): {processing_time:.3f} seconds")
@@ -187,13 +188,14 @@ class TelegramBotManager:
             processing_time = end_time - start_time
             print(f"⏱️ Message processing time (error): {processing_time:.3f} seconds")
 
-    async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int, search_id: str):
+    async def send_product_page(self, update: Update, context: ContextTypes.DEFAULT_TYPE, page_index: int,
+                                search_id: str):
         """Send a page of products (up to 3 products)"""
         # Get search data by ID
         search_data = context.user_data.get('searches', {}).get(search_id)
         if not search_data:
             return
-            
+
         search_response = search_data['search_response']
         products_list = search_response.get('products_list', [])
 
@@ -221,7 +223,7 @@ class TelegramBotManager:
 
         if not image_bytes_io:
             image_bytes_io = self._create_fallback_image()
-        
+
         # Ensure we're at the beginning of the BytesIO stream
         if hasattr(image_bytes_io, 'seek'):
             image_bytes_io.seek(0)
@@ -271,13 +273,13 @@ class TelegramBotManager:
     async def handle_callback_query(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle callback queries from inline keyboard buttons"""
         start_time = time.time()
-        
+
         query = update.callback_query
 
         try:
             # Parse callback data
             data_parts = query.data.split(':')
-            
+
             if len(data_parts) != 4 or data_parts[0] != 'nav':
                 await query.answer(self.error_messages['invalid_data'], show_alert=True)
                 end_time = time.time()
@@ -318,7 +320,7 @@ class TelegramBotManager:
 
             # Send the requested page
             await self.send_product_page(update, context, target_page, search_id)
-            
+
             end_time = time.time()
             processing_time = end_time - start_time
             print(f"⏱️ Callback processing time (successful): {processing_time:.3f} seconds")
