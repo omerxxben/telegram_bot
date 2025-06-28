@@ -24,11 +24,11 @@ class MainProducts:
             print("No product name")
             return []
         products, timings['get_products'] = AliExpressApi().process(product_name_english, 50)
+        if products == "no api available":
+            print("no api available")
+            return []
         products_df, timings['transform_table'] = ProductsTransform().transform_to_table(products)
-        pretty_print_df(products_df)
-
         if products_df.empty:
-            print(products)
             print("Didn't find products")
             return []
         ranked_df = getRank().sort_by_volume(products_df)
@@ -40,7 +40,6 @@ class MainProducts:
         products_df_detailed, timings['get_short_link'] = AliExpressApiShortLink().process(products_df_detailed)
         image_bytes_io, timings['get_image'] = self.creator.save_grid(products_df_detailed, 0, IS_PRINT_IMAGE)
         products_list = ProductsTransform().parse_to_list(products_df_detailed)
-
         if IS_LOGS:
             timings['total'] = time.time() - start_time
             Logger().ali_express_log( search_query, product_name_english, products_df_detailed, self.ai_manager, timings,
