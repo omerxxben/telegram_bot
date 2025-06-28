@@ -244,8 +244,8 @@ class ImageGridCreator:
 
             # Add medal
             medal = self.create_medal(1, size=100)
-            medal_x = self.grid_size[0] - medal.width - 5
-            medal_y = 10
+            medal_x = self.grid_size[0] - medal.width - 20
+            medal_y = 25
             if medal.mode == 'RGBA':
                 final_grid.paste(medal, (medal_x, medal_y), medal)
             else:
@@ -290,7 +290,7 @@ class ImageGridCreator:
             return final_grid
 
         # 3 images case
-        if num_images == 3:
+        else:
             half_width = self.grid_size[0] // 2
             half_height = self.grid_size[1] // 2
             top_size = (half_width, half_height)
@@ -330,55 +330,10 @@ class ImageGridCreator:
 
             return final_grid
 
-        # 4 images case
-        image_urls = image_urls[:4] + [None] * (4 - len(image_urls))
-        individual_width = self.grid_size[0] // 2
-        individual_height = self.grid_size[1] // 2
-        individual_size = (individual_width, individual_height)
-
-        final_grid = Image.new('RGB', self.grid_size, self.colors['primary'])
-        final_grid.paste(grid_image, (0, 0))
-
-        images = []
-        for url in image_urls:
-            if url:
-                img = self.download_image(url)
-            else:
-                img = Image.new('RGB', (400, 300), color=self.colors['light'])
-                draw = ImageDraw.Draw(img)
-                draw.rounded_rectangle([20, 20, 380, 280], radius=20, fill=self.colors['secondary'])
-                draw.text((200, 150), "No Image", fill=self.colors['light'], anchor='mm')
-
-            framed_img = self.create_image_frame(img, individual_size, corner_radius=15)
-            images.append(framed_img)
-
-        positions = [
-            (individual_width, 0),  # Top right (1st place)
-            (0, 0),  # Top left (2nd place)
-            (individual_width, individual_height),  # Bottom right (3rd place)
-            (0, individual_height)  # Bottom left (4th place)
-        ]
-
-        for i, (img, pos) in enumerate(zip(images, positions)):
-            if img.mode == 'RGBA':
-                final_grid.paste(img, pos, img)
-            else:
-                final_grid.paste(img, pos)
-
-            medal = self.create_medal(i + 1, size=80)
-            medal_x = pos[0] + individual_width - medal.width - 30
-            medal_y = pos[1] + 30
-
-            if medal.mode == 'RGBA':
-                final_grid.paste(medal, (medal_x, medal_y), medal)
-            else:
-                final_grid.paste(medal, (medal_x, medal_y))
-
-        return final_grid
     def save_grid(self, df: pd.DataFrame, IS_PRINT_IMAGE=False):
         start_time = time.time()
         image_column: str = "product_main_image_url"
-        image_urls = df[image_column].dropna().head(2).tolist()
+        image_urls = df[image_column].dropna().head(1).tolist()
         grid_image = self.create_grid(image_urls)
         image_bytes_io = self.pil_image_to_bytesio(grid_image)
         if IS_PRINT_IMAGE:
