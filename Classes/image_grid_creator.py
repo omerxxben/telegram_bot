@@ -26,7 +26,7 @@ class ImageGridCreator:
         self.colors = {
             'primary': '#1a1a1a',  # Dark charcoal
             'secondary': '#2d2d2d',  # Medium gray
-            'accent': '#4a9eff',  # Modern blue
+            'accent': '#8394a8',  # Modern blue
             'light': '#f8f9fa',  # Off-white
             'gradient_start': '#667eea',  # Purple-blue
             'gradient_end': '#764ba2',  # Purple
@@ -191,7 +191,6 @@ class ImageGridCreator:
         draw.ellipse(
             [margin, margin, size - margin, size - margin],
             fill=self.colors['accent'],
-            outline=self.colors['secondary'],
             width=3
         )
 
@@ -271,7 +270,7 @@ class ImageGridCreator:
                     medal_y = pos[1] + 225
                 else:
                     medal_x = pos[0] + individual_size[0] - medal.width - 20
-                    medal_y = 20
+                    medal_y = 220
                 final_grid.paste(medal, (medal_x, medal_y), medal)
             return final_grid
 
