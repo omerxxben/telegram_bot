@@ -65,6 +65,9 @@ class TelegramBotManager:
 
     def format_product_text(self, product: Dict[str, Any], position: int) -> str:
         """Format a single product using the template system"""
+        # Unicode directional control characters
+        RLM = '\u200F'  # Right-to-Left Mark - forces RTL direction
+        
         # Get the appropriate medal icon
         medal_icon = self.template_config['medal_icons'][position] if position < len(
             self.template_config['medal_icons']) else f"{position + 1}️⃣"
@@ -97,8 +100,12 @@ class TelegramBotManager:
         link_line = link_line.replace('[אייקון_קישור]', self.template_config['link_icon'])
         link_line = link_line.replace('[קישור_שותף]', product['affiliate_link'])
 
+        # Add RLM character at the beginning of each line to force RTL alignment
+        lines = [title_line, sales_line, rating_line, price_line, link_line]
+        rtl_lines = [RLM + line for line in lines]
+
         # Join all lines with newlines
-        formatted_text = '\n'.join([title_line, sales_line, rating_line, price_line, link_line])
+        formatted_text = '\n'.join(rtl_lines)
 
         return formatted_text
 
