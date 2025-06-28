@@ -59,7 +59,7 @@ class ProductsTransform:
             "product_title": product.get("subject"),
             "sales_count": product.get("sales_count"),
             "price": product.get("target_sale_price"),
-            "affiliate_link": product.get("promotion_link"),
+            "affiliate_link": product.get("product_detail_url"),
             "product_main_image_url": product.get("product_main_image_url")
         }
 
