@@ -187,7 +187,6 @@ class ImageGridCreator:
         else:
             # For 1st, 2nd, 3rd place, use emojis only
             emoji = self.medal_emojis.get(place, '🏅')
-
             font_size = int(size * 0.8)
             try:
                 font = ImageFont.truetype("seguiemj.ttf", font_size)
@@ -280,8 +279,8 @@ class ImageGridCreator:
                     final_grid.paste(img, pos)
 
                 medal = self.create_medal(i + 1, size=80)
-                medal_x = pos[0] + individual_size[0] - medal.width - 5
-                medal_y = pos[1] + 10
+                medal_x = pos[0] + individual_size[0] - medal.width - 17
+                medal_y = pos[1] + 225
 
                 if medal.mode == 'RGBA':
                     final_grid.paste(medal, (medal_x, medal_y), medal)
@@ -320,8 +319,9 @@ class ImageGridCreator:
                     final_grid.paste(img, pos)
 
                 medal = self.create_medal(i + 1, size=80)
-                medal_x = pos[0] + img.width - medal.width - 30
-                medal_y = pos[1] + 30
+                # Adjusted padding from 30 to 10 for a tighter fit
+                medal_x = pos[0] + img.width - medal.width - 20
+                medal_y = pos[1] + 23
 
                 if medal.mode == 'RGBA':
                     final_grid.paste(medal, (medal_x, medal_y), medal)
@@ -375,11 +375,10 @@ class ImageGridCreator:
                 final_grid.paste(medal, (medal_x, medal_y))
 
         return final_grid
-
     def save_grid(self, df: pd.DataFrame, IS_PRINT_IMAGE=False):
         start_time = time.time()
         image_column: str = "product_main_image_url"
-        image_urls = df[image_column].dropna().head(3).tolist()
+        image_urls = df[image_column].dropna().head(2).tolist()
         grid_image = self.create_grid(image_urls)
         image_bytes_io = self.pil_image_to_bytesio(grid_image)
         if IS_PRINT_IMAGE:
