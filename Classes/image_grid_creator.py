@@ -309,7 +309,7 @@ class ImageGridCreator:
 
             return final_grid
 
-    def save_grid(self, df: pd.DataFrame, page_index, IS_PRINT_IMAGE=False, products_per_page: int = 1):
+    def save_grid(self, df: pd.DataFrame, page_index, IS_PRINT_IMAGE=False, products_per_page: int = 3):
         start_time = time.time()
         image_column: str = "product_main_image_url"
         image_urls = df[image_column].dropna().head(products_per_page).tolist()
