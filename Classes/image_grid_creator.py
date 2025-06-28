@@ -333,7 +333,7 @@ class ImageGridCreator:
     def save_grid(self, df: pd.DataFrame, IS_PRINT_IMAGE=False):
         start_time = time.time()
         image_column: str = "product_main_image_url"
-        image_urls = df[image_column].dropna().head(1).tolist()
+        image_urls = df[image_column].dropna().head(3).tolist()
         grid_image = self.create_grid(image_urls)
         image_bytes_io = self.pil_image_to_bytesio(grid_image)
         if IS_PRINT_IMAGE:
