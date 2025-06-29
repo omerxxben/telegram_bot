@@ -119,93 +119,17 @@ class ImageGridCreator:
             return placeholder
 
     def create_medal_or_number(self, ranking: int, size: int = 80) -> Image.Image:
-        """
-        Create a medal emoji for top 3 positions or a custom-drawn number icon for 4+.
-
-        Args:
-            ranking: The actual ranking position (1, 2, 3 for medals, 4+ for numbers)
-            size: Size of the medal/number icon in pixels
-
-        Returns:
-            PIL Image object of the medal emoji or number icon.
-        """
-        # Create a transparent canvas for our icon
         icon_image = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(icon_image)
-
-        # For 1st, 2nd, 3rd place, use reliable medal emojis
-        if ranking <= 3:
-            emoji = self.medal_emojis.get(ranking, '🏅')
-            font_size = int(size * 0.8)
-
-            # Try to find a suitable emoji font
-            emoji_fonts = [
-                "C:/Windows/Fonts/seguiemj.ttf", "seguiemj.ttf",
-                "/System/Library/Fonts/Apple Color Emoji.ttc", "Apple Color Emoji.ttc",
-                "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf", "NotoColorEmoji.ttf"
-            ]
-            font = None
-            for font_path in emoji_fonts:
-                try:
-                    font = ImageFont.truetype(font_path, font_size)
-                    # Check if font can actually render the emoji
-                    if font.getlength(emoji) > 0:
-                        break
-                except IOError:
-                    continue
-
-            if font:
-                try:
-                    # Center the emoji on the canvas
-                    bbox = draw.textbbox((0, 0), emoji, font=font)
-                    text_width = bbox[2] - bbox[0]
-                    text_height = bbox[3] - bbox[1]
-                    x = (size - text_width) / 2
-                    y = (size - text_height) / 2
-                    # Draw the emoji with its embedded color
-                    draw.text((x, y), emoji, font=font, embedded_color=True)
-                    return icon_image
-                except Exception:
-                    # Fallback to text if emoji drawing fails
-                    pass
-
-        # --- NEW ROBUST METHOD FOR RANK 4+ (and as a fallback for medals) ---
-        # For 4th place and beyond, draw the number manually.
-        text = str(ranking)
-
-        # Load a standard, reliable font like Arial.
         try:
-            # Adjust font size based on number of digits for a better fit
-            if len(text) == 1:
-                font_size = size // 2
-            elif len(text) == 2:
-                font_size = size // 2 - 10
-            else:  # 3+ digits
-                font_size = size // 3
-            font = ImageFont.truetype("arialbd.ttf", font_size)  # Bold Arial
-        except IOError:
-            font = ImageFont.load_default()
+            emoji_path = f"emojis/{ranking}.png"  # Update path if needed
+            medal_img = Image.open(emoji_path).convert("RGBA")
+            medal_img = medal_img.resize((size, size), Image.Resampling.LANCZOS)
+            icon_image.paste(medal_img, (0, 0), medal_img)
+            return icon_image
+        except Exception as e:
+            print(f"Error loading medal emoji image for rank {ranking}: {e}")
+            # Fall through to number drawing if loading fails
 
-        # Draw a modern circular background for the number
-        margin = 5  # Small margin around the circle
-        draw.ellipse(
-            [margin, margin, size - margin, size - margin],
-            fill=self.colors['accent'],
-            width=3
-        )
-
-        # Draw the number, centered within the circle
-        text_bbox = draw.textbbox((0, 0), text, font=font)
-        text_width = text_bbox[2] - text_bbox[0]
-        text_height = text_bbox[3] - text_bbox[1]
-        x = (size - text_width) // 2 - text_bbox[0]
-        y = (size - text_height) // 2 - text_bbox[1]
-
-        # Draw the number with a subtle shadow for better readability
-        draw.text((x + 1, y + 1), text, font=font, fill='black')  # Shadow
-        draw.text((x, y), text, font=font, fill=self.colors['light'])  # Main text
-
-        return icon_image
 
     def resize_image_to_fit(self, image: Image.Image, target_size: Tuple[int, int]) -> Image.Image:
         """
