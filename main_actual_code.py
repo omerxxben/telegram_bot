@@ -20,6 +20,7 @@ class MainProducts:
         start_time = time.time()
         timings = {}
         product_name_english = self.ai_manager.translate_hebrew_query(search_query)
+        print(product_name_english)
         if not product_name_english:
             print("No product name")
             return []
@@ -51,7 +52,7 @@ class MainProducts:
             "products_list": products_list,
         }
 if __name__ == "__main__":
-    response = MainProducts().process("מכונת קרח", True, True)
+    response = MainProducts().process("כיסוי למכונת שטיפה בלחץ תואמת אישית", True, True)
     print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)

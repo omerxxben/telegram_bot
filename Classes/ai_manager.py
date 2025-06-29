@@ -96,9 +96,7 @@ class AIManager:
         messages = [
             {
                 "role": "system",
-                "content": "You are a professional Hebrew to English translator specializing in product names. Your task is to translate Hebrew product names to their exact English equivalents. Translate ONLY the product name, nothing else. Keep the translation accurate and specific to the actual product being searched for. Do not add extra words or change the meaning."
-            },
-            {
+                "content": "You are a professional Hebrew to English translator specializing in product names for e-commerce searches. Your task is to translate Hebrew product names to their exact English equivalents and optimize them for AliExpress search queries.Instructions:1. Translate ONLY the product name from Hebrew to English2. Keep the translation accurate and specific to the actual product3. Optimize the translated term for AliExpress search by:- Using common product terminology that sellers on AliExpress typically use- Including relevant keywords that improve search results- Adapting to AliExpress naming conventions when applicable4. Do not add unnecessary words or change the core meaning5. Provide the most searchable version of the product name for AliExpress"},    {
                 "role": "user",
                 "content": f"Translate this Hebrew product name to English: {product_text}"
             }
