@@ -43,7 +43,7 @@ class ProductsTransform:
                 for column in self.columns:
                     row[column] = product.get(column, '')
                 transformed_data.append(row)
-            print(f"pulled this number of rows from hotproducts api: {len(transformed_data)}")
+            print(f"pulled this number of rows from products api: {len(transformed_data)}")
             total_time =  time.time() - start_time
             return pd.DataFrame(transformed_data), total_time
 
