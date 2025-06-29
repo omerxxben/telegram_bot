@@ -236,9 +236,9 @@ class TelegramBotManager:
         if hasattr(image_bytes_io, 'seek'):
             image_bytes_io.seek(0)
 
-        # Create keyboard if there are more results
+        # Create keyboard if there are more results and we haven't reached max page index (9)
         keyboard = []
-        if end_idx < len(products_list):
+        if end_idx < len(products_list) and page_index < 9:
             next_page = page_index + 1
             user_id = search_data['user_id']
             callback_data = f"nav:{next_page}:{user_id}:{search_id}"
@@ -249,7 +249,7 @@ class TelegramBotManager:
             )
             keyboard.append([button])
         else:
-            # Mark search as exhausted when we reach the last page
+            # Mark search as exhausted when we reach the last page or max page limit
             context.user_data['searches'][search_id]['exhausted'] = True
 
         reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
