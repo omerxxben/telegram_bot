@@ -1,14 +1,14 @@
 import os
 
-APP_KEY = "516020"
-APP_SECRET = "jYs7GpzsxdH6x0UXP6yYy45bjTNG5xhY"
-SECOND_APP_KEY = "516350"
-SECOND_APP_SECRET = "qhgttfv2jFzcWPCkTkuP9o9BhgfXwUFw"
-AUTH_CODE = "3_516020_jG11lZfmRyzZtOSK6emJ6rH118674"
-REDIRECT_URI = "https://www.idealf.shop"
-URL = "https://api-sg.aliexpress.com/sync"
-DS_APP_KEY = "516068"
-DS_APP_SECRET = "eCMr5mVeMOEOC3mTgagoGa0e3Fw0fkNZ"
-DS_ACCESS_TOKEN = "50000101724jWlioatvl7jgTAsRUdGdxl2lr1bf75b94VEgYHwxEJovwoNxjsqzz4udp"
 GEMINI_API_KEY = os.environ['GEMINI_API_KEY']
+APP_KEY = os.environ['APP_KEY']
+APP_SECRET = os.environ['APP_SECRET']
+SECOND_APP_KEY = os.environ['SECOND_APP_KEY']
+SECOND_APP_SECRET = os.environ['SECOND_APP_SECRET']
+AUTH_CODE = os.environ['AUTH_CODE']
+DS_APP_KEY = os.environ['DS_APP_KEY']
+DS_APP_SECRET = os.environ['DS_APP_SECRET']
+BOT_TOKEN_NEW = os.environ['BOT_TOKEN']
+BOT_TOKEN = "7873230963:AAH0Z1rAPqLlqvXMzpYasR8NMyk4qPn-ANY"
 get_products_api = "aliexpress.affiliate.product.query"
+URL = "https://api-sg.aliexpress.com/sync"
