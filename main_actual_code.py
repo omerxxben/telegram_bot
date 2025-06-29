@@ -32,7 +32,7 @@ class MainProducts:
         #pretty_print_df(products_df)
 
         if products_df.empty:
-            print("Didn't find products")
+            print("Didn't find products ")
             return []
         ranked_df = getRank().sort_by_volume(products_df)
         filtered_df = self.ai_manager.get_suitable_titles(product_name_english, ranked_df)
