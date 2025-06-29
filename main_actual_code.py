@@ -52,6 +52,6 @@ class MainProducts:
         }
 if __name__ == "__main__":
     response = MainProducts().process("מטען", True, True)
-    #print(response)
+    print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
