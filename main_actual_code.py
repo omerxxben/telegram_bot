@@ -31,7 +31,10 @@ class MainProducts:
         if products_df.empty:
             print("Didn't find products ")
             return []
+
         ranked_df = getRank().sort_by_volume(products_df)
+        pretty_print_df(ranked_df)
+
         filtered_df = self.ai_manager.get_suitable_titles(product_name_english, ranked_df)
         if filtered_df.empty:
             print("Didn't find matching products via AI")
@@ -48,7 +51,7 @@ class MainProducts:
             "products_list": products_list,
         }
 if __name__ == "__main__":
-    response = MainProducts().process("מטען", True, True)
+    response = MainProducts().process("מכונת קרח", True, True)
     print(response)
     #print(json.dumps(response, indent=2, ensure_ascii=False))
     #print(products_list)
