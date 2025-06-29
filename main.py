@@ -12,7 +12,7 @@ def start_bot():
 
 @app.route('/')
 def home():
-    return 'Bot is running!'
+    return 'Bot is running !'
 
 if __name__ == '__main__':
     # Start the bot in a background thread
