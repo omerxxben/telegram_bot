@@ -71,9 +71,10 @@ class AliExpressApiShortLink:
                     print(f"Successfully generated {len(link_map)} affiliate links.")
                 else:
                     error_message = data.get("error_response", {}).get("msg", "No promotion links found.")
+                    print(error_message)
                     print(f"API call did not return promotion links. Reason: {error_message}")
 
-                break  # Exit retry loop on success or non-retry error
+                break
 
             except requests.exceptions.RequestException as e:
                 print(f"Error fetching short links from API: {e}")

@@ -24,13 +24,10 @@ class MainProducts:
             print("No product name")
             return []
         products, timings['get_products'] = AliExpressApi().process(product_name_english, 50)
-
         if products == "no api available":
             print("no api available")
             return []
         products_df, timings['transform_table'] = ProductsTransform().transform_to_table(products)
-        #pretty_print_df(products_df)
-
         if products_df.empty:
             print("Didn't find products ")
             return []
