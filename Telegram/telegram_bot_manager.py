@@ -8,7 +8,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 from Classes.image_grid_creator import ImageGridCreator
-from main_actual_code import MainProducts
+from main import MainProducts
 
 
 class TelegramBotManager:
@@ -49,7 +49,7 @@ class TelegramBotManager:
         """Generate medal icons for positions 0-49"""
         icons = ['🥇', '🥈', '🥉']  # First 3 positions get medals
 
-        # For positions 4-49, create number emojis
+        # For positions 4-49, create number mojis
         for i in range(4, 50):
             number_str = str(i)
             emoji_number = ''.join([f'{digit}️⃣' for digit in number_str])
