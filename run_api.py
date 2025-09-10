@@ -6,7 +6,7 @@ def get_cost(product_name="חפש לי jbl flip 6"):
 
     try:
         response = requests.get(url, params=params)
-        response.raise_for_status()  # Raise error for bad responses (4xx, 5xx)
+        response.raise_for_status()  # Raise error for bad responses   (4xx, 5xx)
         data = response.json()
         print("Response from API:")
         print(data)
